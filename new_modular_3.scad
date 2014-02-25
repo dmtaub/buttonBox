@@ -41,6 +41,10 @@ side_length = 40;
 // Set the thickness of the tile, in mm
 thickness = 3.5;
 
+//percentage of sphere radius to translate
+sphere_farout=-.45;
+
+
 // Set the border thickness, in mm
 border = 3.5;	
 
@@ -51,6 +55,7 @@ clearance = .17;
 
 // Add extra length to the snaps, in mm
 lengthen = .3;
+
 
 
 //thick=2.5; //tri
@@ -203,18 +208,20 @@ module snap_maker(num_sides,radiusa,snapwidth){
 	}
 }
 
-
 module hinge_a(bw,hl,ro,cl,i){
 	ri = ro/3;
 	sri = ro/2 *1.7;
-	farout=-0.9;
 	//if(i < snaps/2){
 	// if(((i < snaps/2) || (i==snaps)) && (i!=0)){
 	if (i%2 ==0){ 
 		union(){     
 			hinge_arm(bw,hl,ro,cl);
 			//translate([bw,-farout,ro])sphere(r=sri,center=true);
-			translate([bw,hl+farout,ro])sphere(r=sri,center=true);
+			translate([bw,(hl-sri/4)+sphere_farout*sri,ro])
+				difference(){
+					sphere(r=sri,center=true);
+					translate([-.05,-sri-sri*sphere_farout,-.05])cube(sri*2+.1,center=true);
+				}
 		}
 
 	}
