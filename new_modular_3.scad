@@ -76,10 +76,10 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 	//inside radius depends on the border thickness
 	inside = radius-border/(cos(180/num_sides)); 
 
-	//width of each snap depends on number of snaps	
-	snapwidth = radius*sin(180/num_sides)/snaps;
-
 	radiusa=radius;//-thickness/2;
+
+	//width of each snap depends on number of snaps	
+	snapwidth = (radius-thickness)*sin(180/num_sides)/snaps;
 
 	outter_rad = button_rad+thick;
 
@@ -94,10 +94,10 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 	difference(){
 		union(){
 			//make the polygon base
-			poly_maker(num_sides,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
+			poly_maker(num_sides,radiusa-thickness,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside-thickness); 
 
 			//make the snaps
-			snap_maker(num_sides,radiusa,snapwidth);
+			snap_maker(num_sides,radiusa-thickness,snapwidth);
 		}
 		// for extra led holes if inner_circle_rad > 0
 		translate([0,0,1])linear_extrude(height=thickness,center=true)
