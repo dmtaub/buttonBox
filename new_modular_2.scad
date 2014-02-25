@@ -53,6 +53,7 @@ outter_rad = button_rad+thick;
 
 circle_rad = ((inside-outter_rad)/2)/cos(angle/3);
 
+inner_circle_rad = 2.5;
 inner_circle_offset = circle_rad/2;
 
 //line_thick = 4; //tri
@@ -65,7 +66,7 @@ echo(radius);
 echo(inside);
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-module full_tile(thick=5.5, button_rad=12.5, line_thick=6, inner_circle_rad = 0){difference(){
+module full_tile(){difference(){
 	union(){
 		//make the polygon base
 		poly_maker(); 									
