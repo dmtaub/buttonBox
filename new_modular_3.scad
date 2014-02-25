@@ -10,7 +10,14 @@ full_tile(6);
 
 
 //full_tile(3); 
-translate([0,-63,0])rotate([0,0,30])
+
+translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
+
+translate([50,-30,0])rotate([0,0,-30])
+  full_tile(3,thick=2.5, button_rad=2.5, line_thick=4, inner_circle_rad = 0);
+
+
+translate([-50,-30,0])rotate([0,0,-30])
   full_tile(3,thick=2.5, button_rad=2.5, line_thick=4, inner_circle_rad = 0);
 
 
@@ -21,7 +28,7 @@ $fn=50;
 
 // Choose the number of sides for the tile
 //sides = 3; // [3,4,5,6,7,8,9,10,11,12]
-sides=6;
+//sides=6;
 
 // Choose the number of snaps on each side
 snaps = 4; // [2,3,4,5,6,7,8]
@@ -91,7 +98,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 		translate([0,0,1])linear_extrude(height=thickness,center=true)
 			for(i=[0:num_sides]){
 				//rotation is around the z-axis [0,0,1]
-				rotate(i*360/sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
+				rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
 					circle(inner_circle_rad,center=true);
 			}}
 }
