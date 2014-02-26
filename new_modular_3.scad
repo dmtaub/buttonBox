@@ -9,7 +9,7 @@ full_tile(6);
 //translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
 
 
-%translate([0,-62,0])rotate([0,0,90])
+%translate([0,-63,0])rotate([0,0,90])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
 //full_tile(3); 
@@ -143,7 +143,7 @@ module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_ci
 							//the order to connect the three vertices above
 							paths = [[0,1,2]]
 					       );
-					%polygon(
+					*polygon(
 
 							//the three vertices of the triangle
 							points =	[[0-.1,0-.1], //tweaks fix CGAL errors
@@ -219,7 +219,7 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 					rotate(180/num_sides) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
-					translate([-thickness/2,2*(i+.5)*snapwidth,0]) 
+					translate([-thickness/2,2*(i+.5)*snapwidth+clearance/2,0]) 
 					hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
 			}
 	}
