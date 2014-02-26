@@ -75,7 +75,7 @@ angle=90;
 module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	//radius depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
-    line_thick = border/(sin(180/num_sides)); // was 6
+  line_thick = border/1.5/(sin(180/num_sides)); // was 6
 
 	radiusa=radius-thickness/2;//-thickness/2;
 
@@ -83,10 +83,9 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	inside = radiusa-border/(cos(180/num_sides)); 
 
 	//width of each snap depends on number of snaps	
-	snapwidth = -(thickness/2)*sin(45)/snaps+radius*sin(180/num_sides)/snaps;
+	snapwidth = -(thickness/2)*sin(45)/snaps+side_length/2/snaps;
 	//snapwidth=radius*sin(180/num_sides)/snaps;
 	//snapwidth = side_length/2/snaps;
-    echo(snapwidth);
 	outter_rad = button_rad+thick;
 
 	circle_rad = ((inside+thickness-outter_rad)/2)/cos(angle/3);
