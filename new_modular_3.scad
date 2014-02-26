@@ -9,6 +9,9 @@ full_tile(6);
 //translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
 
 
+%translate([0,-62,0])rotate([0,0,90])
+  full_tile(3,thick=2.5, button_rad=2.5, line_thick=4, inner_circle_rad = 0);
+
 //full_tile(3); 
 
 translate([0,-110,0])rotate([0,0,60])full_tile(6);
@@ -42,7 +45,7 @@ side_length = 40;
 thickness = 3.5;
 
 //percentage of sphere radius to translate
-sphere_farout=-.45;
+sphere_farout=-.35; //was .45
 
 
 // Set the border thickness, in mm
@@ -73,17 +76,17 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 	//radius depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
 
-	//inside radius depends on the border thickness
-	inside = radius-border/(cos(180/num_sides)); 
+	radiusa=radius-thickness/2;//-thickness/2;
 
-	radiusa=radius;//-thickness/2;
+	//inside radius depends on the border thickness
+	inside = radiusa-border/(cos(180/num_sides)); 
 
 	//width of each snap depends on number of snaps	
-	snapwidth = (radius-thickness)*sin(180/num_sides)/snaps;
-
+	snapwidth = radiusa*sin(180/num_sides)/snaps;
+    echo(snapwidth);
 	outter_rad = button_rad+thick;
 
-	circle_rad = ((inside-outter_rad)/2)/cos(angle/3);
+	circle_rad = ((inside+thickness-outter_rad)/2)/cos(angle/3);
 
 	inner_circle_offset = circle_rad/2;
 
@@ -94,10 +97,10 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 	difference(){
 		union(){
 			//make the polygon base
-			poly_maker(num_sides,radiusa-thickness,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside-thickness); 
+			poly_maker(num_sides,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
 
 			//make the snaps
-			snap_maker(num_sides,radiusa-thickness,snapwidth);
+			snap_maker(num_sides,radiusa,snapwidth);
 		}
 		// for extra led holes if inner_circle_rad > 0
 		translate([0,0,1])linear_extrude(height=thickness,center=true)
@@ -113,7 +116,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 //build the polygon shape of the tile
 //shape is made up of n=num_sides wedges that are rotated around
 module poly_maker(num_sides,radiusa,thick,button_rad,line_thick, inner_circle_rad, line_length, translation, outter_rad, inside){
-
+    radius = radiusa+thickness;
 	//subtract the smaller polygon from the larger polygon
 	difference(){
 
@@ -132,6 +135,16 @@ module poly_maker(num_sides,radiusa,thick,button_rad,line_thick, inner_circle_ra
 							points =	[[0-.1,0-.1], //tweaks fix CGAL errors
 							[radiusa,0-.01],
 							[radiusa*cos(360/num_sides)-.01,radiusa*sin(360/num_sides)+.01]],
+
+							//the order to connect the three vertices above
+							paths = [[0,1,2]]
+					       );
+					%polygon(
+
+							//the three vertices of the triangle
+							points =	[[0-.1,0-.1], //tweaks fix CGAL errors
+							[radius,0-.01],
+							[radius*cos(360/num_sides)-.01,radius*sin(360/num_sides)+.01]],
 
 							//the order to connect the three vertices above
 							paths = [[0,1,2]]
