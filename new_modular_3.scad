@@ -77,7 +77,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	radius = side_length/(2*sin(180/num_sides)); 
   line_thick = border/1.5/(sin(180/num_sides)); // was 6
 
-	radiusa=radius-thickness/2;//-thickness/2;
+	radiusa=radius-thickness*cos(180/num_sides);//-thickness/2;
 
 	//inside radius depends on the border thickness
 	inside = radiusa-border/(cos(180/num_sides)); 
@@ -99,7 +99,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	difference(){
 		union(){
 			//make the polygon base
-			poly_maker(num_sides,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
+			poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
 
 			//make the snaps
 			snap_maker(num_sides,radiusa,snapwidth);
@@ -117,8 +117,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 // MODULES ///////////////////////////////////////////////////////////////
 //build the polygon shape of the tile
 //shape is made up of n=num_sides wedges that are rotated around
-module poly_maker(num_sides,radiusa,thick,button_rad,line_thick, inner_circle_rad, line_length, translation, outter_rad, inside){
-    radius = radiusa+thickness;
+module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad, line_length, translation, outter_rad, inside){
 	//subtract the smaller polygon from the larger polygon
 	difference(){
 
