@@ -83,9 +83,11 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	inside = radiusa-border/(cos(180/num_sides)); 
 
 	//width of each snap depends on number of snaps	
-	snapwidth = -(thickness/1.2)*sin(45)/snaps+side_length/2/snaps;
-	//snapwidth=radius*sin(180/num_sides)/snaps;
-	//snapwidth = side_length/2/snaps;
+	//snapwidth = -(thickness/1.215)*sin(45)/snaps+side_length/2/snaps;
+	
+	snapwidth = side_length/2/(snaps+1);
+	//echo(snapwidth);
+
 	outter_rad = button_rad+thick;
 
 	circle_rad = ((inside+thickness-outter_rad)/2)/cos(angle/3);
@@ -216,7 +218,7 @@ module snap_maker(num_sides,radiusa,snapwidth){
 					rotate(180/num_sides) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
-					translate([0,2*i*snapwidth,0]) 
+					translate([0,2*(i+.238)*snapwidth,0]) 
 					hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
 			}
 	}
