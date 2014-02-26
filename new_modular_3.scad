@@ -9,12 +9,13 @@ full_tile(6);
 //translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
 
 
-%translate([2.7-2.5,-62,0])rotate([0,0,90])
+%translate([0,-62,0])rotate([0,0,90])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
 //full_tile(3); 
 
 translate([0,-110,0])rotate([0,0,60])full_tile(6);
+%translate([0,-180,0])rotate([0,0,60])full_tile(6);
 
 translate([30,-55,0])rotate([0,0,180])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
@@ -82,10 +83,11 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	//inside radius depends on the border thickness
 	inside = radiusa-border/(cos(180/num_sides)); 
 
-	//width of each snap depends on number of snaps	
-	snapwidth = -(thickness/1.215)*sin(45)/snaps+side_length/2/snaps;
+	//width of each snap depends on number of snaps	-- magic formula :(
+	//snapwidth = -(thickness/1.215)*sin(45)/snaps+side_length/2/snaps;
 	//snapwidth = radiusa*sin(180/num_sides)/snaps;
-	//snapwidth = side_length/2/(snaps+1);
+
+	snapwidth = side_length/2/(snaps+1);
 	//echo(snapwidth);
 
 	outter_rad = button_rad+thick;
@@ -104,7 +106,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 			poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
 
 			//make the snaps
-			snap_maker(num_sides,radiusa,snapwidth);
+			snap_maker(num_sides,radius,radiusa,snapwidth);
 		}
 		// for extra led holes if inner_circle_rad > 0
 		translate([0,0,1])linear_extrude(height=thickness,center=true)
@@ -130,7 +132,6 @@ module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_ci
 
 				//rotation is around the z-axis [0,0,1]
 				rotate(i*360/num_sides,[0,0,1])	
-
 					//make triangular wedge with angle based on number of num_sides
 					polygon(
 
@@ -199,7 +200,7 @@ module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_ci
 //build the snaps around the tile
 //try the commands alone with i=1 and i=2 to see how this works
 //remember to read from the bottom to the top to make sense of this
-module snap_maker(num_sides,radiusa,snapwidth){
+module snap_maker(num_sides,radius, radiusa,snapwidth){
 
 	//rotate the side of snaps n=num_sides times at angle of 360/n each time
 	for(i=[0:num_sides-1]){ 
@@ -212,13 +213,13 @@ module snap_maker(num_sides,radiusa,snapwidth){
 
 				//read the rest of the commands from bottom to top
 				//translate the snap to the first side
-				translate([radiusa,0,-thickness/2]) 
+				translate([radius,0,-thickness/2]) 
 
 					//rotate the snap to correct angle for first side
 					rotate(180/num_sides) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
-					translate([0,2*(i)*snapwidth-clearance/2,0]) 
+					translate([-thickness/2,2*(i+.5)*snapwidth,0]) 
 					hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
 			}
 	}
