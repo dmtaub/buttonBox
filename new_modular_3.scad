@@ -9,19 +9,19 @@ full_tile(6);
 //translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
 
 
-%translate([0,-62,0])rotate([0,0,90])
-  full_tile(3,thick=2.5, button_rad=2.5, line_thick=4, inner_circle_rad = 0);
+%translate([2.7-2.5,-62,0])rotate([0,0,90])
+  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
 //full_tile(3); 
 
 translate([0,-110,0])rotate([0,0,60])full_tile(6);
 
 translate([30,-55,0])rotate([0,0,180])
-  full_tile(3,thick=2.5, button_rad=2.5, line_thick=4, inner_circle_rad = 0);
+  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
 
 translate([-30,-55,0])rotate([0,0,0])
-  full_tile(3,thick=2.5, button_rad=2.5, line_thick=4, inner_circle_rad = 0);
+  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,9 +72,10 @@ angle=90;
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circle_rad = 0){
+module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	//radius depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
+    line_thick = border/(sin(180/num_sides)); // was 6
 
 	radiusa=radius-thickness/2;//-thickness/2;
 
@@ -82,7 +83,9 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, line_thick=6, inner_circ
 	inside = radiusa-border/(cos(180/num_sides)); 
 
 	//width of each snap depends on number of snaps	
-	snapwidth = radiusa*sin(180/num_sides)/snaps;
+	snapwidth = -(thickness/2)*sin(45)/snaps+radius*sin(180/num_sides)/snaps;
+	//snapwidth=radius*sin(180/num_sides)/snaps;
+	//snapwidth = side_length/2/snaps;
     echo(snapwidth);
 	outter_rad = button_rad+thick;
 
