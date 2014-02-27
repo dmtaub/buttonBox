@@ -9,13 +9,13 @@ full_tile(6);
 //translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
 
 
-%translate([0,-63,0])rotate([0,0,90])
+/*translate([0,-63,0])rotate([0,0,90])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
-
+*/
 //full_tile(3); 
 
 translate([0,-110,0])rotate([0,0,60])full_tile(6);
-%translate([0,-180,0])rotate([0,0,60])full_tile(6);
+//translate([0,-180,0])rotate([0,0,60])full_tile(6);
 
 translate([30,-55,0])rotate([0,0,180])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
