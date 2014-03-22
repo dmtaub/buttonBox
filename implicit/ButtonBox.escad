@@ -27,7 +27,7 @@ $fn=50;
 //sides=6;
 
 // Choose the number of snaps on each side
-snaps = 4; // [2,3,4,5,6,7,8]
+snaps = 5; // [2,3,4,5,6,7,8]
 
 /* [Size] */
 
@@ -149,7 +149,7 @@ module hinge_a(bw,hl,ro,cl,i){
 									paths = [[0,1,2]]
 							       );
 					}
-					difference(){
+					*difference(){
 						union(){
 							for(i=[0:num_sides]){
 
