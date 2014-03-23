@@ -77,7 +77,14 @@ module hinge_a(bw,hl,ro,cl,i){
   else{
     difference(){
       hinge_arm(bw,hl,ro,cl);
-      translate([bw,hl+cl,ro]){rotate([360/4,0,0]){cylinder(h=hl+2*cl,r=ri*1.2);}}
+      translate([bw,hl+cl,ro]){
+			//rotate([360/4,0,0]){cylinder(h=hl+2*cl,r=ri*1.2);}
+			union(){
+				sphere(r=ri*1.2);
+				translate([0,-(hl+2*cl),0])sphere(r=ri*1.2);
+				translate([0,-(hl+2*cl)/2,0])cube([ri*1.5,hl+4*cl,ri*1.5],center=true);
+			}
+		}
     }
   }
   }
@@ -164,7 +171,35 @@ module hinge_a(bw,hl,ro,cl,i){
       }
     }
   }
+  module snap_maker2(num_sides,radius, radiusa, snapwidth){
+    union(){
+      //rotate the side of snaps n=num_sides times at angle of fullcircle/n each time
+      for(i=[0:num_sides-1]){ 
+        //rotation is around the z-axis [0,0,1]
+        rotate([0,0,(i+.5)*360/num_sides]) 	{
 
+          //build snaps for first side at the origin and move into positions
+          for(j=[0:snaps-1]){	
+
+            //read the rest of the commands from bottom to top
+            //translate the snap to the first side
+            translate([radiusa-thickness+clearance,0,-thickness/2]) {
+
+              //rotate the snap to correct angle for first side
+              //rotate(180/num_sides) {
+
+                //for i^th snap translate 2*i snapwidths over from origin
+                translate([-thickness/2,2*(j+0.5)*snapwidth-side_length/2+clearance/2,0]) {
+                  //cube(3.5); 
+                  hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,0.01,j);
+                //}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
 
   module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
@@ -198,7 +233,8 @@ module hinge_a(bw,hl,ro,cl,i){
         poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
 
         //make the snaps
-        snap_maker(num_sides,radius,radiusa,snapwidth);
+        //snap_maker(num_sides,radius,radiusa,snapwidth);
+        snap_maker2(num_sides,radius,radiusa,snapwidth);
       }
       // for extra led holes if inner_circle_rad > 0
       /*translate([0,0,1])linear_extrude(height=thickness,center=true)
