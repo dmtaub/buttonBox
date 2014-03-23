@@ -6,7 +6,10 @@
 //////////////////////////////////////////////////////////////////////////
 // PARAMETERS ////////////////////////////////////////////////////////////
 $fn=50;
-fullcircle=2*pi;
+
+//test if openscad or implicit, and set angle accordingly;
+fullcircle = (cos(180)==-1) ? 360 : 2*pi;
+echo(fullcircle);
 /* [Shape] */
 
 // Choose the number of sides for the tile
@@ -49,7 +52,7 @@ module hinge_arm(BLOCKWIDTH,h_len,rad_o,clip){
   union(){
     translate([-clip,clip,0]) cube([BLOCKWIDTH,h_len-clip,rad_o*2]);
     //difference(){
-    translate([BLOCKWIDTH-clip,h_len,rad_o]) rotate([fullcircle/4,0,0]) cylinder(r=rad_o,h=h_len-clip);
+    translate([BLOCKWIDTH-clip,h_len,rad_o]) rotate([360/4,0,0]) cylinder(r=rad_o,h=h_len-clip);
     //translate([-rad_o/2-clip,-clip,-clip]) cube([BLOCKWIDTH/2,BLOCKWIDTH/3,rad_o*2+2*clip]);
     //}
   }
@@ -73,7 +76,7 @@ module hinge_a(bw,hl,ro,cl,i){
   else{
     difference(){
       hinge_arm(bw,hl,ro,cl);
-      translate([bw,hl+cl,ro])rotate([fullcircle/4,0,0])cylinder(h=hl+2*cl,r=ri*1.2);
+      translate([bw,hl+cl,ro])rotate([360/4,0,0])cylinder(h=hl+2*cl,r=ri*1.2);
     }
   }
   }
@@ -82,8 +85,8 @@ module hinge_a(bw,hl,ro,cl,i){
   //build the polygon shape of the tile
   //shape is made up of n=num_sides wedges that are rotated around
   module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad, line_length, translation, outter_rad, inside){
-	echo(radiusa);
-echo(inside);
+    echo(radiusa);
+    echo(inside);
     //subtract the smaller polygon from the larger polygon
     difference(){
       //extrude to thicken the polygon
@@ -137,7 +140,7 @@ echo(inside);
     for(i=[0:num_sides-1]){ 
 
       //rotation is around the z-axis [0,0,1]
-      rotate([0,0,i*fullcircle/num_sides]) 	
+      rotate([0,0,i*360/num_sides]) 	
 
         //build snaps for first side at the origin and move into positions
         for(i=[0:snaps-1]){	
@@ -147,7 +150,7 @@ echo(inside);
           translate([radius,0,-thickness/2]) 
 
             //rotate the snap to correct angle for first side
-            rotate(fullcircle/2/num_sides) 
+            rotate(360/2/num_sides) 
 
             //for i^th snap translate 2*i snapwidths over from origin
             translate([-thickness/2,2*(i+0.5)*snapwidth+clearance/2,0]) 
@@ -169,7 +172,7 @@ echo(inside);
 
     //width of each snap depends on number of snaps	-- magic formula :(
     //snapwidth = -(thickness/1.215)*sin(fullcircle/8)/snaps+side_length/2/snaps;
-    //snapwidth = radiusa*sin(fullcircle/2/num_sides)/snaps;
+    //snapwidth = radiusa*sin(360/2/num_sides)/snaps;
 
     snapwidth = side_length/2/(snaps+1);
 
@@ -195,7 +198,7 @@ echo(inside);
       /*translate([0,0,1])linear_extrude(height=thickness,center=true)
         for(i=[0:num_sides]){
       //rotation is around the z-axis [0,0,1]
-      rotate([0,0,i*fullcircle/num_sides+angle]){translate([0,translation+inner_circle_offset])}
+      rotate([0,0,i*360/num_sides+angle]){translate([0,translation+inner_circle_offset])}
       circle(inner_circle_rad,center=true);
       }*/
     }
@@ -205,14 +208,14 @@ echo(inside);
 
   full_tile(6); 
 
-/*
-   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
- */
+  /*
+     full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
+   */
 
-//thick=2.5; //tri
-//thick=5.5; // hex
-//button_rad=12.5; //hex
-//button_rad=2.5;//tri
-//line_thick = 4; //tri
-//line_thick = 6;
+  //thick=2.5; //tri
+  //thick=5.5; // hex
+  //button_rad=12.5; //hex
+  //button_rad=2.5;//tri
+  //line_thick = 4; //tri
+  //line_thick = 6;
 
