@@ -50,14 +50,15 @@ angle=fullcircle/4;
 // MODULES ///////////////////////////////////////////////////////////////
 module hinge_arm(BLOCKWIDTH,h_len,rad_o,clip){
   union(){
-    translate([-clip,clip,0]) cube([BLOCKWIDTH,h_len-clip,rad_o*2]);
+    translate([-clip,clip,0]){ cube([BLOCKWIDTH,h_len-clip,rad_o*2]);}
     //difference(){
-    translate([BLOCKWIDTH-clip,h_len,rad_o]) rotate([360/4,0,0]) cylinder(r=rad_o,h=h_len-clip);
-    //translate([-rad_o/2-clip,-clip,-clip]) cube([BLOCKWIDTH/2,BLOCKWIDTH/3,rad_o*2+2*clip]);
+    translate([BLOCKWIDTH-clip,h_len,rad_o]) {rotate([360/4,0,0]) {cylinder(r=rad_o,h=h_len-clip);} }
+    //translate([-rad_o/2-clip,-clip,-clip]) {cube([BLOCKWIDTH/2,BLOCKWIDTH/3,rad_o*2+2*clip]);}
     //}
   }
 }
 module hinge_a(bw,hl,ro,cl,i){
+  $res = 0.5;
   ri = ro/3;
   sri = ro/2 *1.7;
   if ( (i/2)-floor(i/2) == 0) {
@@ -65,18 +66,18 @@ module hinge_a(bw,hl,ro,cl,i){
     union(){     
       hinge_arm(bw,hl,ro,cl);
       //translate([bw,-farout,ro])sphere(r=sri,center=true);
-      translate([bw,(hl-sri/4)+sphere_farout*sri,ro])
+      translate([bw,(hl-sri/4)+sphere_farout*sri,ro]){
         difference(){
           sphere(r=sri,center=true);
-          translate([-0.05,-sri-sri*sphere_farout,-0.05])cube(sri*2+0.1,center=true);
-        }
+          translate([-0.05,-sri-sri*sphere_farout,-0.05]){cube(sri*2+0.1,center=true);}
+        }}
     }
 
   }
   else{
     difference(){
       hinge_arm(bw,hl,ro,cl);
-      translate([bw,hl+cl,ro])rotate([360/4,0,0])cylinder(h=hl+2*cl,r=ri*1.2);
+      translate([bw,hl+cl,ro]){rotate([360/4,0,0]){cylinder(h=hl+2*cl,r=ri*1.2);}}
     }
   }
   }
@@ -135,27 +136,32 @@ module hinge_a(bw,hl,ro,cl,i){
   //try the commands alone with i=1 and i=2 to see how this works
   //remember to read from the bottom to the top to make sense of this
   module snap_maker(num_sides,radius, radiusa, snapwidth){
+    union(){
+      //rotate the side of snaps n=num_sides times at angle of fullcircle/n each time
+      for(i=[0:num_sides-1]){ 
+        //rotation is around the z-axis [0,0,1]
+        rotate([0,0,i*360/num_sides]) 	{
 
-    //rotate the side of snaps n=num_sides times at angle of fullcircle/n each time
-    for(i=[0:num_sides-1]){ 
+          //build snaps for first side at the origin and move into positions
+          for(j=[0:snaps-1]){	
 
-      //rotation is around the z-axis [0,0,1]
-      rotate([0,0,i*360/num_sides]) 	
+            //read the rest of the commands from bottom to top
+            //translate the snap to the first side
+            translate([radius,0,-thickness/2]) {
 
-        //build snaps for first side at the origin and move into positions
-        for(i=[0:snaps-1]){	
+              //rotate the snap to correct angle for first side
+              rotate(180/num_sides) {
 
-          //read the rest of the commands from bottom to top
-          //translate the snap to the first side
-          translate([radius,0,-thickness/2]) 
-
-            //rotate the snap to correct angle for first side
-            rotate(360/2/num_sides) 
-
-            //for i^th snap translate 2*i snapwidths over from origin
-            translate([-thickness/2,2*(i+0.5)*snapwidth+clearance/2,0]) 
-            hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,0.01,i);
+                //for i^th snap translate 2*i snapwidths over from origin
+                translate([-thickness/2,2*(j+0.5)*snapwidth+clearance/2,0]) {
+                  //cube(3.5); 
+                  hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,0.01,j);
+                }
+              }
+            }
+          }
         }
+      }
     }
   }
 
@@ -192,7 +198,7 @@ module hinge_a(bw,hl,ro,cl,i){
         poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
 
         //make the snaps
-        //snap_maker(num_sides,radius,radiusa,snapwidth);
+        snap_maker(num_sides,radius,radiusa,snapwidth);
       }
       // for extra led holes if inner_circle_rad > 0
       /*translate([0,0,1])linear_extrude(height=thickness,center=true)
