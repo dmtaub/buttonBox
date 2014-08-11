@@ -3,27 +3,29 @@
 // based on mathgrrl polysnap tiles
 
 // AS SUBMITTED TO THINGIVERSE CUSTOMIZER - DO NOT MODIFY THIS COPY
+printable = -4;
+x=.22;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
 
-
-full_tile(6); 
-//translate([0,-6*13,0])rotate([0,0,60])full_tile(6);
+full_tile(3); 
+translate([-25+printable,0,0])rotate([0,0,60])full_tile(3);
 
 
 /*translate([0,-63,0])rotate([0,0,90])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
-*/
+* /
 //full_tile(3); 
 
-translate([0,-110,0])rotate([0,0,60])full_tile(6);
-//translate([0,-180,0])rotate([0,0,60])full_tile(6);
-
+translate([10,-60,0])rotate([0,0,30])full_tile(6);
+translate([-60,-60,0])rotate([0,0,35])full_tile(5);
+translate([-60,0,0])rotate([0,0,45])full_tile(4);
+/*
 translate([30,-55,0])rotate([0,0,180])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
 
 translate([-30,-55,0])rotate([0,0,0])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
-
+*/
 
 //////////////////////////////////////////////////////////////////////////
 // PARAMETERS ////////////////////////////////////////////////////////////
@@ -46,7 +48,7 @@ side_length = 40;
 thickness = 3.5;
 
 //percentage of sphere radius to translate
-sphere_farout=-.35; //was .45
+sphere_farout=-.35+x*2/3; //was .45
 
 
 // Set the border thickness, in mm
@@ -55,7 +57,7 @@ border = 3.5;
 /* [Adjust Fit] */
 
 // Add extra space between snaps, in mm
-clearance = .17;
+clearance = .17+x;
 
 // Add extra length to the snaps, in mm
 lengthen = .3;
@@ -73,7 +75,8 @@ angle=90;
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
+//module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
+module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0){
 	//radius depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
   line_thick = border/1.5/(sin(180/num_sides)); // was 6
@@ -108,13 +111,18 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 			//make the snaps
 			snap_maker(num_sides,radius,radiusa,snapwidth);
 		}
-		// for extra led holes if inner_circle_rad > 0
-		translate([0,0,1])linear_extrude(height=thickness,center=true)
-			for(i=[0:num_sides]){
-				//rotation is around the z-axis [0,0,1]
-				rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
-					circle(inner_circle_rad,center=true);
-			}}
+		union(){
+			fillet_maker(num_sides,radius,radiusa,snapwidth);
+
+			// for extra led holes if inner_circle_rad > 0
+			translate([0,0,1])linear_extrude(height=thickness,center=true)
+				for(i=[0:num_sides]){
+					//rotation is around the z-axis [0,0,1]
+					rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
+						circle(inner_circle_rad,center=true);
+				}
+      	}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -207,7 +215,7 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 
 		//rotation is around the z-axis [0,0,1]
 		rotate(i*360/num_sides,[0,0,1]) 	
-
+			union(){
 			//build snaps for first side at the origin and move into positions
 			for(i=[0:snaps-1]){	
 
@@ -216,12 +224,61 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 				translate([radius,0,-thickness/2]) 
 
 					//rotate the snap to correct angle for first side
-					rotate(180/num_sides) 
+					rotate(180/num_sides,[0,0,1]) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
 					translate([-thickness/2,2*(i+.5)*snapwidth+clearance/2,0]) 
-					hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
+						union(){
+							hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
+						}
 			}
+ 		}
+	}
+}
+angleclear = 1;
+
+module fillet_maker(num_sides,radius, radiusa,snapwidth){
+
+	//rotate the side of snaps n=num_sides times at angle of 360/n each time
+	for(j=[0:num_sides-1]){ 
+		rotate(j*360/num_sides,[0,0,1]) 	
+
+			translate([radius,0,-thickness/2]) 
+					//rotate the snap to correct angle for first side
+			rotate(180/num_sides,[0,0,1]) 
+				translate([-angleclear,0,angleclear])
+					translate([-thickness/2,2*(snaps)*snapwidth,0]) 
+						union(){
+							translate([0,snapwidth-clearance/2,-angleclear])
+								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+							translate([0,snapwidth-clearance/2,thickness-angleclear])
+								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+						}
+		//rotation is around the z-axis [0,0,1]
+		rotate(j*360/num_sides,[0,0,1]) 	
+			union(){
+			//build snaps for first side at the origin and move into positions
+			for(i=[0:snaps-1]){	
+
+				//read the rest of the commands from bottom to top
+				//translate the snap to the first side
+				translate([radius,0,-thickness/2]) 
+
+					//rotate the snap to correct angle for first side
+					rotate(180/num_sides,[0,0,1]) 
+
+					//for i^th snap translate 2*i snapwidths over from origin
+				translate([-angleclear,0,angleclear])
+					translate([-thickness/2,2*(i+.5)*snapwidth,0]) 
+						union(){
+							translate([0,snapwidth-clearance/2,-angleclear])
+								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+							translate([0,snapwidth-clearance/2,thickness-angleclear])
+								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+						}
+		
+			}
+ 		}
 	}
 }
 

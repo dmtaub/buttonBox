@@ -5,7 +5,8 @@
 // AS SUBMITTED TO THINGIVERSE CUSTOMIZER - DO NOT MODIFY THIS COPY
 
 
-full_tile(6); 
+full_tile(a);
+ 
 
 /*
 translate([0,-110,0])rotate([0,0,60])full_tile(6);

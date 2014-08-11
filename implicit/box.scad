@@ -58,7 +58,7 @@ module hinge_arm(BLOCKWIDTH,h_len,rad_o,clip){
   }
 }
 module hinge_a(bw,hl,ro,cl,i){
-  $res = 0.5;
+  //$res = 0.5;
   ri = ro/3;
   sri = ro/2 *1.7;
   if ( (i/2)-floor(i/2) == 0) {
@@ -176,7 +176,7 @@ module hinge_a(bw,hl,ro,cl,i){
       //rotate the side of snaps n=num_sides times at angle of fullcircle/n each time
       for(i=[0:num_sides-1]){ 
         //rotation is around the z-axis [0,0,1]
-        rotate([0,0,(i+.5)*360/num_sides]) 	{
+        rotate([0,0,(i+0.5)*360/num_sides]){
 
           //build snaps for first side at the origin and move into positions
           for(j=[0:snaps-1]){	
@@ -186,13 +186,9 @@ module hinge_a(bw,hl,ro,cl,i){
             translate([radiusa-thickness+clearance,0,-thickness/2]) {
 
               //rotate the snap to correct angle for first side
-              //rotate(180/num_sides) {
-
                 //for i^th snap translate 2*i snapwidths over from origin
                 translate([-thickness/2,2*(j+0.5)*snapwidth-side_length/2+clearance/2,0]) {
-                  //cube(3.5); 
                   hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,0.01,j);
-                //}
               }
             }
           }
