@@ -4,10 +4,14 @@
 
 // AS SUBMITTED TO THINGIVERSE CUSTOMIZER - DO NOT MODIFY THIS COPY
 printable = -4;
-x=.22;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
+spherefactor = 1.7;
+cylfactor = 1.5; //was 1.2
+x=.1;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
 
-full_tile(3); 
-translate([-25+printable,0,0])rotate([0,0,60])full_tile(3);
+full_tile(3,3.5,2.5); 
+//full_tile(5,3.5,12.5); 
+
+//translate([-25+printable,0,0])rotate([0,0,60])full_tile(3,3.5,2.5);
 
 
 /*translate([0,-63,0])rotate([0,0,90])
@@ -284,7 +288,7 @@ module fillet_maker(num_sides,radius, radiusa,snapwidth){
 
 module hinge_a(bw,hl,ro,cl,i){
 	ri = ro/3;
-	sri = ro/2 *1.7;
+	sri = ro/2 * spherefactor;
 	//if(i < snaps/2){
 	// if(((i < snaps/2) || (i==snaps)) && (i!=0)){
 	if (i%2 ==0){ 
@@ -302,7 +306,7 @@ module hinge_a(bw,hl,ro,cl,i){
 	else{
 		difference(){
 			hinge_arm(bw,hl,ro,cl);
-			translate([bw,hl+cl,ro])rotate([90,0,0])cylinder(h=hl+2*cl,r=ri*1.2);
+			translate([bw,hl+cl,ro])rotate([90,0,0])cylinder(h=hl+2*cl,r=ri*cylfactor);
 		}
 	}
 }

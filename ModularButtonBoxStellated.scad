@@ -5,7 +5,7 @@
 // AS SUBMITTED TO THINGIVERSE CUSTOMIZER - DO NOT MODIFY THIS COPY
 
 
-full_tile(a);
+full_tile(6);
  
 
 /*
