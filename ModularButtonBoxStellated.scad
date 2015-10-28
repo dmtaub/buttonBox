@@ -3,14 +3,26 @@
 // based on mathgrrl polysnap tiles
 
 // AS SUBMITTED TO THINGIVERSE CUSTOMIZER - DO NOT MODIFY THIS COPY
+printable = -4;
+spherefactor = 1.7;
+cylfactor = 1.5; //was 1.2
+x=.1;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
+
+//full_tile(3,3.5,2.5); 
+full_tile(5,3.5,12.5); 
+
+//translate([-25+printable,0,0])rotate([0,0,60])full_tile(3,3.5,2.5);
 
 
-full_tile(6);
- 
+/*translate([0,-63,0])rotate([0,0,90])
+  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
+* /
+//full_tile(3); 
 
+translate([10,-60,0])rotate([0,0,30])full_tile(6);
+translate([-60,-60,0])rotate([0,0,35])full_tile(5);
+translate([-60,0,0])rotate([0,0,45])full_tile(4);
 /*
-translate([0,-110,0])rotate([0,0,60])full_tile(6);
-
 translate([30,-55,0])rotate([0,0,180])
   full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
 
@@ -40,7 +52,7 @@ side_length = 40;
 thickness = 3.5;
 
 //percentage of sphere radius to translate
-sphere_farout=-.35; //was .45
+sphere_farout=-.35+x*2/3; //was .45
 
 
 // Set the border thickness, in mm
@@ -49,7 +61,7 @@ border = 3.5;
 /* [Adjust Fit] */
 
 // Add extra space between snaps, in mm
-clearance = .17;
+clearance = .17+x;
 
 // Add extra length to the snaps, in mm
 lengthen = .3;
@@ -67,10 +79,12 @@ angle=90;
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
+//module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
+// full-tile fillet = 0, 1, or 2 sided fillet
+module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, fillet = 1, stellation_height = 10){
 	//radius depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
-  line_thick = border/1.5/(sin(180/num_sides)); // was 6
+   line_thick = border/1.5/(sin(180/num_sides)); // was 6
 
 	radiusa=radius-thickness/2/cos(180/num_sides);//-thickness/2;
 
@@ -84,7 +98,7 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	snapwidth = side_length/2/(snaps+1);
 	//echo(snapwidth);
 
-	outter_rad = button_rad+thick;
+	outter_rad =  0; //disable for stellated : was button_rad+thick;
 
 	circle_rad = ((inside+thickness-outter_rad)/2)/cos(angle/3);
 
@@ -97,26 +111,32 @@ module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 	difference(){
 		union(){
 			//make the polygon base
-			poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad,line_length, translation, outter_rad,inside); 
-
+			poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, line_length, translation, outter_rad, inside); 
+            //TODO: center_holder(line_thick, line_length)
+            tweener( num_sides, radiusa, thick, button_rad, stellation_height );
 			//make the snaps
 			snap_maker(num_sides,radius,radiusa,snapwidth);
 		}
-		// for extra led holes if inner_circle_rad > 0
-		translate([0,0,1])linear_extrude(height=thickness,center=true)
-			for(i=[0:num_sides]){
-				//rotation is around the z-axis [0,0,1]
-				rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
-					circle(inner_circle_rad,center=true);
-			}}
+		union(){
+            if (fillet > 0)
+                #fillet_maker(num_sides,radius,radiusa,snapwidth, fillet == 2);
+
+			// for extra led holes if inner_circle_rad > 0
+			translate([0,0,1])linear_extrude(height=thickness,center=true)
+				for(i=[0:num_sides]){
+					//rotation is around the z-axis [0,0,1]
+					rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
+						circle(inner_circle_rad,center=true);
+				}
+      	}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
 // MODULES ///////////////////////////////////////////////////////////////
 //build the polygon shape of the tile
 //shape is made up of n=num_sides wedges that are rotated around
-module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_circle_rad, line_length, translation, outter_rad, inside){
-
+module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, line_length, translation, outter_rad, inside){
 	//subtract the smaller polygon from the larger polygon
 	difference(){
 
@@ -134,16 +154,6 @@ module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_ci
 							points =	[[0-.1,0-.1], //tweaks fix CGAL errors
 							[radiusa,0-.01],
 							[radiusa*cos(360/num_sides)-.01,radiusa*sin(360/num_sides)+.01]],
-
-							//the order to connect the three vertices above
-							paths = [[0,1,2]]
-					       );
-					*polygon(
-
-							//the three vertices of the triangle
-							points =	[[0-.1,0-.1], //tweaks fix CGAL errors
-							[radius,0-.01],
-							[radius*cos(360/num_sides)-.01,radius*sin(360/num_sides)+.01]],
 
 							//the order to connect the three vertices above
 							paths = [[0,1,2]]
@@ -172,21 +182,23 @@ module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, inner_ci
 								paths = [[0,1,2]]
 						       );
 				}
-				difference(){
-					union(){
-						for(i=[0:num_sides]){
+                if (outter_rad > 0) {
+                    difference(){
+                        union(){
+                            for(i=[0:num_sides]){
 
-							//rotation is around the z-axis [0,0,1]
-							rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation])
-								//circle(circle_rad,center=true);
-								square([line_thick,line_length],center=true);
-						}
-						circle(outter_rad);
-					}
-					union(){
-						circle(button_rad);
-					}
-				}
+                                //rotation is around the z-axis [0,0,1]
+                                rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation])
+                                    //circle(circle_rad,center=true);
+                                    square([line_thick,line_length],center=true);
+                            }
+                            circle(outter_rad);
+                        }
+                        union(){
+                            circle(button_rad);
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -202,7 +214,7 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 
 		//rotation is around the z-axis [0,0,1]
 		rotate(i*360/num_sides,[0,0,1]) 	
-
+			union(){
 			//build snaps for first side at the origin and move into positions
 			for(i=[0:snaps-1]){	
 
@@ -211,18 +223,69 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 				translate([radius,0,-thickness/2]) 
 
 					//rotate the snap to correct angle for first side
-					rotate(180/num_sides) 
+					rotate(180/num_sides,[0,0,1]) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
 					translate([-thickness/2,2*(i+.5)*snapwidth+clearance/2,0]) 
-					hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
+						union(){
+							hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
+						}
 			}
+ 		}
+	}
+}
+angleclear = 1;
+
+module fillet_maker(num_sides,radius, radiusa, snapwidth, both = true){
+
+	//rotate the side of snaps n=num_sides times at angle of 360/n each time
+	for(j=[0:num_sides-1]){ 
+		rotate(j*360/num_sides,[0,0,1]) 	
+
+			translate([radius,0,-thickness/2]) 
+					//rotate the snap to correct angle for first side
+			rotate(180/num_sides,[0,0,1]) 
+				translate([-angleclear,0,angleclear])
+					translate([-thickness/2,2*(snaps)*snapwidth,0]) 
+						union(){
+							translate([0,snapwidth-clearance/2,-angleclear])
+								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+							if(both)
+                                translate([0,snapwidth-clearance/2,thickness-angleclear])
+                                    rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+						}
+		//rotation is around the z-axis [0,0,1]
+		rotate(j*360/num_sides,[0,0,1]) 	
+			union(){
+			//build snaps for first side at the origin and move into positions
+			for(i=[0:snaps-1]){	
+
+				//read the rest of the commands from bottom to top
+				//translate the snap to the first side
+				translate([radius,0,-thickness/2]) 
+
+					//rotate the snap to correct angle for first side
+					rotate(180/num_sides,[0,0,1]) 
+
+					//for i^th snap translate 2*i snapwidths over from origin
+				translate([-angleclear,0,angleclear])
+					translate([-thickness/2,2*(i+.5)*snapwidth,0]) 
+						union(){
+							translate([0,snapwidth-clearance/2,-angleclear])
+								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+							if (both)
+                                translate([0,snapwidth-clearance/2,thickness-angleclear])
+                                    rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
+						}
+		
+			}
+ 		}
 	}
 }
 
 module hinge_a(bw,hl,ro,cl,i){
 	ri = ro/3;
-	sri = ro/2 *1.7;
+	sri = ro/2 * spherefactor;
 	//if(i < snaps/2){
 	// if(((i < snaps/2) || (i==snaps)) && (i!=0)){
 	if (i%2 ==0){ 
@@ -240,7 +303,7 @@ module hinge_a(bw,hl,ro,cl,i){
 	else{
 		difference(){
 			hinge_arm(bw,hl,ro,cl);
-			translate([bw,hl+cl,ro])rotate([90,0,0])cylinder(h=hl+2*cl,r=ri*1.2);
+			translate([bw,hl+cl,ro])rotate([90,0,0])cylinder(h=hl+2*cl,r=ri*cylfactor);
 		}
 	}
 }
@@ -253,4 +316,71 @@ module hinge_arm(BLOCKWIDTH,h_len,rad_o,clip){
 		//translate([-rad_o/2-clip,-clip,-clip]) cube([BLOCKWIDTH/2,BLOCKWIDTH/3,rad_o*2+2*clip]);
 		//}
 	}
+}
+
+
+
+
+
+use <tween_loft.scad>			// Define all functions (this is the main file with full documentation)
+include <tween_shapes.scad>	// Define all tween shape geometries
+
+// ------------------------Parameters -----------------------------------------------
+module tweener( num_sides, radius, thick, button_rad, stellation_height ) {
+    shapes = [0,0,0, tween_triangle, tween_square, tween_pentagon, tween_hexagon];
+    shapes2 = [0,0,0, tween_triangle, tween_square, tween_circle, tween_circle];
+    shape1 = shapes[num_sides];
+    
+    waypointStop = .4;
+    
+    // The lower shape
+    shape1Size 		= radius-thick/2;				// Size of the lower shape
+    shape1Rotation 	= 0;				// Rotation of the lower shape
+    shape1Extension 	= 3.5;				// Extend the profile (space for tube clamp, etc.)
+    shape1Centroid  	= [0,0];			// Location of center point
+
+
+    // The middle shape
+    waypoint = shape1;
+    waypointSize 		= waypointStop*(button_rad-shape1Size)+shape1Size; //waypointStop*radius+(1-waypointStop)*button_rad;				// Size of the lower shape
+    waypointRotation 	= 0;				// Rotation of the lower shape
+    waypointExtension 	= 0;				// Extend the profile (space for tube clamp, etc.)
+    waypointCentroid  	= [0,0];			// Location of center point
+
+
+    // The upper shape
+    shape2			= shapes2[num_sides];		
+    shape2Size 		= button_rad;				// Size of the upper shape
+    shape2Rotation 	= 0;				// RotationSize of the upper shape
+    shape2Extension 	= 0;				// Extend the profile (space for tube clamp, etc.)
+    shape2Centroid	= [0,0];			// Location of center point
+    shape2ExtensionAdjustment	= 0;	// Moves top extension down by n slices.
+
+    wallThickness		= thick;				// Wall Thickness - higher values add material but will seal gaps
+                                            // Thickness is added to the exterior diameter of tu be, no effect on solids
+                    
+    isHollow 			= 1;				// If 1, create a tube.  If 0, create a solid.
+
+    extrusionHeight	= stellation_height;				// Height of the loft
+
+    extrusionSlices = 20; //47; //max that i've seen work	
+    sliceAdjustment	= 0;				// Ensure the slices intersect by this amount, 
+                                            // needed if OpenSCAD is generating more than 2 volumes for an STL file
+
+    sliceHeight = extrusionHeight * 1.0 / extrusionSlices;	// Calculate the height of each slice
+    firstSetCount = round(extrusionSlices*waypointStop);
+    secondSetCount = round(extrusionSlices*(1-waypointStop));
+
+    // Generate the top level part
+    translate([0,0,shape1Extension/2])
+    union(){
+    tweenLoft(shape1, shape1Size, shape1Rotation, shape1Centroid, shape1Extension,
+                shape1, waypointSize, waypointRotation, waypointCentroid, waypointExtension, 0,
+                firstSetCount, sliceHeight, sliceAdjustment, wallThickness/2, isHollow);
+  
+    translate([0,0,stellation_height*waypointStop])
+        tweenLoft(waypoint, waypointSize, waypointRotation, waypointCentroid, waypointExtension,
+                shape2, shape2Size, shape2Rotation, shape2Centroid, shape2Extension, shape2ExtensionAdjustment,
+                secondSetCount, sliceHeight, sliceAdjustment, wallThickness/2, isHollow);
+    }
 }
