@@ -2,14 +2,13 @@
 // truncated tetra buttonbox part maker by dmt
 // based on mathgrrl polysnap tiles
 
-// AS SUBMITTED TO THINGIVERSE CUSTOMIZER - DO NOT MODIFY THIS COPY
 printable = -4;
-spherefactor = 1.7;
+spherefactor = 1.5; //was 1.7
 cylfactor = 1.5; //was 1.2
-x=.1;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
-
+x=.2    ;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
+waypoint = .2;
 //full_tile(3,3.5,2.5); 
-full_tile(5,3.5,12.5); 
+full_tile(5,3.5,12.5,0,1,10, waypoint); 
 
 //translate([-25+printable,0,0])rotate([0,0,60])full_tile(3,3.5,2.5);
 
@@ -81,10 +80,10 @@ angle=90;
 // RENDERS ///////////////////////////////////////////////////////////////
 //module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
 // full-tile fillet = 0, 1, or 2 sided fillet
-module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, fillet = 1, stellation_height = 10){
+module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, fillet = 1, stellation_height = 10, waypoint = .4){
 	//radius depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
-   line_thick = border/1.5/(sin(180/num_sides)); // was 6
+    line_thick = border/1.5/(sin(180/num_sides)); // was 6
 
 	radiusa=radius-thickness/2/cos(180/num_sides);//-thickness/2;
 
@@ -111,15 +110,21 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, fi
 	difference(){
 		union(){
 			//make the polygon base
-			poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, line_length, translation, outter_rad, inside); 
+            difference(){
+                poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, line_length, translation, outter_rad, inside); 
+                for (i=[0:num_sides]){
+                    rotate((i+.5)*360/num_sides+angle,[0,0,1]) translate([0,radiusa,0]) 
+                        translate([0,0,0])cube([2,1,5],true);
+            }
+            }
             //TODO: center_holder(line_thick, line_length)
-            tweener( num_sides, radiusa, thick, button_rad, stellation_height );
+            tweener( num_sides, radiusa-.3, thick, button_rad, stellation_height , waypoint);
 			//make the snaps
 			snap_maker(num_sides,radius,radiusa,snapwidth);
 		}
 		union(){
             if (fillet > 0)
-                #fillet_maker(num_sides,radius,radiusa,snapwidth, fillet == 2);
+                fillet_maker(num_sides,radius,radiusa,snapwidth, fillet == 2);
 
 			// for extra led holes if inner_circle_rad > 0
 			translate([0,0,1])linear_extrude(height=thickness,center=true)
@@ -326,12 +331,11 @@ use <tween_loft.scad>			// Define all functions (this is the main file with full
 include <tween_shapes.scad>	// Define all tween shape geometries
 
 // ------------------------Parameters -----------------------------------------------
-module tweener( num_sides, radius, thick, button_rad, stellation_height ) {
+module tweener( num_sides, radius, thick, button_rad, stellation_height, waypointStop = .5 ) {
     shapes = [0,0,0, tween_triangle, tween_square, tween_pentagon, tween_hexagon];
     shapes2 = [0,0,0, tween_triangle, tween_square, tween_circle, tween_circle];
     shape1 = shapes[num_sides];
     
-    waypointStop = .4;
     
     // The lower shape
     shape1Size 		= radius-thick/2;				// Size of the lower shape
@@ -342,7 +346,8 @@ module tweener( num_sides, radius, thick, button_rad, stellation_height ) {
 
     // The middle shape
     waypoint = shape1;
-    waypointSize 		= waypointStop*(button_rad-shape1Size)+shape1Size; //waypointStop*radius+(1-waypointStop)*button_rad;				// Size of the lower shape
+    waypointSize 		= waypointStop*(button_rad-shape1Size)+shape1Size; //waypointStop*radius+(1-waypointStop)*button_rad;				
+    // Size of the lower shape
     waypointRotation 	= 0;				// Rotation of the lower shape
     waypointExtension 	= 0;				// Extend the profile (space for tube clamp, etc.)
     waypointCentroid  	= [0,0];			// Location of center point
