@@ -7,7 +7,6 @@ spherefactor = 1.5; //was 1.7
 cylfactor = 1.5; //was 1.2
 x=.2    ;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
 waypoint = .2;
-//full_tile(3,3.5,2.5); 
 
 /* [Adjust Fit] */
 
@@ -47,7 +46,17 @@ border = 3.5;
 // full-tile fillet = 0, 1, or 2 sided fillet
 fillet = 1;
 
-//cube([100,2,2],true);
+
+full_tile(5,3.5,12.5); 
+
+
+module test_four(thickness =  3.5, holesize = 3.5, inner, stellation = 10){
+    for (j=[3:6]){
+        translate([0,0,(j-3)*20])full_tile(j,thickness,holesize,inner,stellation,waypoint);
+    }
+}
+//test_four();
+
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
@@ -59,7 +68,10 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, st
 	poly_radius=radius-thick/2/cos(180/num_sides);
 
 	//inside radius depends on the border thickness
-	inside = poly_radius-border/(cos(180/num_sides)); 
+	inside = poly_radius-border/(cos(180/num_sides));
+    
+    // draw a line thru the connection point
+    %translate([radius,0,0])rotate([0,0,180/num_sides])cube([1,100,1],true);
 
 	snapwidth = side_length/2/(snaps+1);
 
@@ -178,13 +190,7 @@ module partholder_maker(num_sides, radius, thick, button_rad, line_thick, rotate
     }
 }
     
-module test_four(){
-    translate([0,0,60])full_tile(3,3.5,1.5,0,10, waypoint); 
-    translate([0,0,40])full_tile(4,3.5,1.5,0,10, waypoint); 
-    translate([0,0,20])full_tile(5,3.5,12.5,0,10, waypoint); 
-    full_tile(6,3.5,12.5,0,10, waypoint); 
-}
-test_four();
+
 //build the snaps around the tile
 //try the commands alone with i=1 and i=2 to see how this works
 //remember to read from the bottom to the top to make sense of this
