@@ -65,10 +65,10 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, st
 	radius = side_length/(2*sin(180/num_sides)); 
     line_thick = border/1.5/(sin(180/num_sides)); // was 6
 
-	poly_radius=radius-thick/2/cos(180/num_sides);
+	poly_radius=radius-thick/2/cos(180/num_sides)-lengthen;
 
 	//inside radius depends on the border thickness
-	inside = poly_radius-border/(cos(180/num_sides));
+	inside = poly_radius-border/(cos(180/num_sides))-lengthen;
     
     // draw a line thru the connection point
     %translate([radius,0,0])rotate([0,0,180/num_sides])cube([1,100,1],true);
@@ -195,12 +195,12 @@ module partholder_maker(num_sides, radius, thick, button_rad, line_thick, rotate
 //try the commands alone with i=1 and i=2 to see how this works
 //remember to read from the bottom to the top to make sense of this
 module snap_maker(num_sides, radius, thick,snapwidth){
-
+    theta  =360/num_sides;
 	//rotate the side of snaps n=num_sides times at angle of 360/n each time
 	for(i=[0:num_sides-1]){ 
 
 		//rotation is around the z-axis [0,0,1]
-		rotate(i*360/num_sides,[0,0,1]) 	
+		rotate(i*theta,[0,0,1]) 	
 			union(){
 			//build snaps for first side at the origin and move into positions
 			for(i=[0:snaps-1]){	
@@ -213,7 +213,7 @@ module snap_maker(num_sides, radius, thick,snapwidth){
 					rotate(180/num_sides,[0,0,1]) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
-					translate([-thick/2,2*(i+.5)*snapwidth+clearance/2,0]) 
+					translate([-lengthen-thick/2,2*(i+.5)*snapwidth+clearance/2,0]) 
 						union(){
 							hinge_a(thick/2+lengthen,snapwidth-clearance,thick/2,.01,i);
 						}
