@@ -8,7 +8,6 @@ cylfactor = 1.5; //was 1.2
 x=.2    ;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
 waypoint = .2;
 //full_tile(3,3.5,2.5); 
-full_tile(5,3.5,12.5,0,10, waypoint); 
 
 /* [Adjust Fit] */
 
@@ -48,8 +47,7 @@ border = 3.5;
 // full-tile fillet = 0, 1, or 2 sided fillet
 fillet = 1;
 
-angle=90;
-
+//cube([100,2,2],true);
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
@@ -71,17 +69,17 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, st
             poly_maker(num_sides,poly_radius,inside,thick, true); 
             
             // make the center structures
-            partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick);
+            partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
 
             //TODO: center_holder(line_thick, line_length)
-            *tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height , waypoint);
+            *tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint);
 
 			//make the snaps
-			*snap_maker(num_sides,radius,thick,snapwidth);
+			snap_maker(num_sides,radius,thick,snapwidth);
 		}
-		*union(){
+		union(){
             if (fillet > 0)
-               #fillet_maker(num_sides,radius,thick,snapwidth, fillet == 2);
+               fillet_maker(num_sides,radius,thick,snapwidth, fillet == 2);
       	}
 	}
 }
@@ -169,7 +167,7 @@ module partholder_maker(num_sides, radius, thick, button_rad, line_thick, rotate
                 for(i=[0:num_sides]){
 
                     //rotation is around the z-axis [0,0,1]
-                    rotate((i+.75+angle_offset/2)*360/num_sides,[0,0,1])translate([0,line_length/2])
+                    rotate((-.25*num_sides%2+i+angle_offset/2)*360/num_sides,[0,0,1])translate([0,line_length/2])
                         //circle(circle_rad,center=true);
                         square([line_thick,line_length],center=true);
                 }
@@ -180,9 +178,13 @@ module partholder_maker(num_sides, radius, thick, button_rad, line_thick, rotate
     }
 }
     
-
-
-
+module test_four(){
+    translate([0,0,60])full_tile(3,3.5,1.5,0,10, waypoint); 
+    translate([0,0,40])full_tile(4,3.5,1.5,0,10, waypoint); 
+    translate([0,0,20])full_tile(5,3.5,12.5,0,10, waypoint); 
+    full_tile(6,3.5,12.5,0,10, waypoint); 
+}
+test_four();
 //build the snaps around the tile
 //try the commands alone with i=1 and i=2 to see how this works
 //remember to read from the bottom to the top to make sense of this
