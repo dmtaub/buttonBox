@@ -8,54 +8,7 @@ cylfactor = 1.5; //was 1.2
 x=.2    ;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
 waypoint = .2;
 //full_tile(3,3.5,2.5); 
-full_tile(5,3.5,12.5,0,1,10, waypoint); 
-
-//translate([-25+printable,0,0])rotate([0,0,60])full_tile(3,3.5,2.5);
-
-
-/*translate([0,-63,0])rotate([0,0,90])
-  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
-* /
-//full_tile(3); 
-
-translate([10,-60,0])rotate([0,0,30])full_tile(6);
-translate([-60,-60,0])rotate([0,0,35])full_tile(5);
-translate([-60,0,0])rotate([0,0,45])full_tile(4);
-/*
-translate([30,-55,0])rotate([0,0,180])
-  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
-
-
-translate([-30,-55,0])rotate([0,0,0])
-  full_tile(3,thick=2.5, button_rad=2.5, inner_circle_rad = 0);
-*/
-
-//////////////////////////////////////////////////////////////////////////
-// PARAMETERS ////////////////////////////////////////////////////////////
-$fn=50;
-/* [Shape] */
-
-// Choose the number of sides for the tile
-//sides = 3; // [3,4,5,6,7,8,9,10,11,12]
-//sides=6;
-
-// Choose the number of snaps on each side
-snaps = 4; // [2,3,4,5,6,7,8]
-
-/* [Size] */
-
-// Set the length of each side, in mm
-side_length = 40; 
-
-// Set the thickness of the tile, in mm
-thickness = 3.5;
-
-//percentage of sphere radius to translate
-sphere_farout=-.35+x*2/3; //was .45
-
-
-// Set the border thickness, in mm
-border = 3.5;	
+full_tile(5,3.5,12.5,0,10, waypoint); 
 
 /* [Adjust Fit] */
 
@@ -65,74 +18,70 @@ clearance = .17+x;
 // Add extra length to the snaps, in mm
 lengthen = .3;
 
-
+//percentage of sphere radius to translate
+sphere_farout=-.35+x*2/3; //was .45
 
 //thick=2.5; //tri
 //thick=5.5; // hex
 //button_rad=12.5; //hex
 //button_rad=2.5;//tri
 //line_thick = 4; //tri
-//line_thick = 6;
+//line_thick = 6; //hex
+
+//////////////////////////////////////////////////////////////////////////
+// PARAMETERS ////////////////////////////////////////////////////////////
+$fn=50;
+/* [Shape] */
+
+// Choose the number of snaps on each side
+snaps = 4; // [2,3,4,5,6,7,8]
+
+/* [Size] */
+
+// Set the length of each side, in mm
+side_length = 40; 
+
+// Set the border thickness, in mm
+border = 3.5;	
+
+
+// full-tile fillet = 0, 1, or 2 sided fillet
+fillet = 1;
 
 angle=90;
 
+
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-//module full_tile(num_sides, thick=5.5, button_rad=12.5, inner_circle_rad = 0){
-// full-tile fillet = 0, 1, or 2 sided fillet
-module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, fillet = 1, stellation_height = 10, waypoint = .4){
-	//radius depends on side length
+module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, stellation_height = 10, waypoint = .4){
+	//radius of connection points -- depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
     line_thick = border/1.5/(sin(180/num_sides)); // was 6
 
-	radiusa=radius-thickness/2/cos(180/num_sides);//-thickness/2;
+	poly_radius=radius-thick/2/cos(180/num_sides);
 
 	//inside radius depends on the border thickness
-	inside = radiusa-border/(cos(180/num_sides)); 
-
-	//width of each snap depends on number of snaps	-- magic formula :(
-	//snapwidth = -(thickness/1.215)*sin(45)/snaps+side_length/2/snaps;
-	//snapwidth = radiusa*sin(180/num_sides)/snaps;
+	inside = poly_radius-border/(cos(180/num_sides)); 
 
 	snapwidth = side_length/2/(snaps+1);
-	//echo(snapwidth);
-
-	outter_rad =  0; //disable for stellated : was button_rad+thick;
-
-	circle_rad = ((inside+thickness-outter_rad)/2)/cos(angle/3);
-
-	inner_circle_offset = circle_rad/2;
-
-	line_length= circle_rad*2;
-
-	translation=(button_rad+thick/2+circle_rad);
 
 	difference(){
 		union(){
 			//make the polygon base
-            difference(){
-                poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, line_length, translation, outter_rad, inside); 
-                for (i=[0:num_sides]){
-                    rotate((i+.5)*360/num_sides+angle,[0,0,1]) translate([0,radiusa,0]) 
-                        translate([0,0,0])cube([2,1,5],true);
-            }
-            }
-            //TODO: center_holder(line_thick, line_length)
-            tweener( num_sides, radiusa-.3, thick, button_rad, stellation_height , waypoint);
-			//make the snaps
-			snap_maker(num_sides,radius,radiusa,snapwidth);
-		}
-		union(){
-            if (fillet > 0)
-                fillet_maker(num_sides,radius,radiusa,snapwidth, fillet == 2);
+            poly_maker(num_sides,poly_radius,inside,thick, true); 
+            
+            // make the center structures
+            partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick);
 
-			// for extra led holes if inner_circle_rad > 0
-			translate([0,0,1])linear_extrude(height=thickness,center=true)
-				for(i=[0:num_sides]){
-					//rotation is around the z-axis [0,0,1]
-					rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation+inner_circle_offset])
-						circle(inner_circle_rad,center=true);
-				}
+            //TODO: center_holder(line_thick, line_length)
+            *tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height , waypoint);
+
+			//make the snaps
+			*snap_maker(num_sides,radius,thick,snapwidth);
+		}
+		*union(){
+            if (fillet > 0)
+               #fillet_maker(num_sides,radius,thick,snapwidth, fillet == 2);
       	}
 	}
 }
@@ -141,78 +90,103 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, fi
 // MODULES ///////////////////////////////////////////////////////////////
 //build the polygon shape of the tile
 //shape is made up of n=num_sides wedges that are rotated around
-module poly_maker(num_sides,radius,radiusa,thick,button_rad,line_thick, line_length, translation, outter_rad, inside){
-	//subtract the smaller polygon from the larger polygon
-	difference(){
+module poly_maker(num_sides,radius,inside_rad,thick, blunted = false, bluntFactor=1){
+    echo(str("generating ",num_sides," sided",
+    (blunted ? str("(blunted by ",bluntFactor,"mm)") : ""),
+    " polygon with outer radius: ",radius,
+    " and inner radius: ",inside_rad));
+    cgal_fix = 0;//.01; //tweaks fix CGAL errors
+  	
+    //extrude to thicken the polygon    
+    linear_extrude(height=thick,center=true){
+      
+        //subtract the smaller polygon from the larger polygon
+        difference(){
+            //rotate the wedge n=num_sides times at angle of 360/n each time
+            for(i=[0:num_sides]){
+                //rotation is around the z-axis [0,0,1]
+                rotate(i*360/num_sides,[0,0,1])	
+                    //make triangular wedge with angle based on number of num_sides
+                    polygon(
+                        //the three vertices of the triangle
+                        points =	[[0-cgal_fix,0-cgal_fix], 
+                                    [radius,0-cgal_fix],
+                                    [radius*cos(360/num_sides)-cgal_fix,radius*sin(360/num_sides)+cgal_fix]],
+                        //the order to connect the three vertices above
+                        paths = [[0,1,2]]
+                    );
+            }
 
-		//extrude to thicken the polygon
-		linear_extrude(height=thickness,center=true){ 
-			//rotate the wedge n=num_sides times at angle of 360/n each time
-			for(i=[0:num_sides]){
+            //rotate the wedge n=num_sides times at angle of 360/n each time			
+            for(i=[0:num_sides]){
 
-				//rotation is around the z-axis [0,0,1]
-				rotate(i*360/num_sides,[0,0,1])	
-					//make triangular wedge with angle based on number of num_sides
-					polygon(
+                //rotation is around the z-axis [0,0,1]
+                rotate(i*360/num_sides,[0,0,1])	{
 
-							//the three vertices of the triangle
-							points =	[[0-.1,0-.1], //tweaks fix CGAL errors
-							[radiusa,0-.01],
-							[radiusa*cos(360/num_sides)-.01,radiusa*sin(360/num_sides)+.01]],
+                    //make triangular wedge with angle based on number of num_sides
+                    polygon(
 
-							//the order to connect the three vertices above
-							paths = [[0,1,2]]
-					       );
-			}
-		}
-		//extrude to thicken the center polygon that will be the hole
-		linear_extrude(height=thickness+2,center=true){ 
-
-			//rotate the wedge n=num_sides times at angle of 360/n each time			
-			difference(){
-				for(i=[0:num_sides]){
-
-					//rotation is around the z-axis [0,0,1]
-					rotate(i*360/num_sides,[0,0,1])	
-
-						//make triangular wedge with angle based on number of num_sides
-						polygon(
-
-								//the three vertices of the triangle
-								points =	[[0-.2,0-.2], //tweaks fix CGAL errors
-								[inside,0-.01],
-								[inside*cos(360/num_sides)-.01,inside*sin(360/num_sides)+.01]],
-
-								//the order to connect the three vertices above
-								paths = [[0,1,2]]
-						       );
-				}
-                if (outter_rad > 0) {
-                    difference(){
-                        union(){
-                            for(i=[0:num_sides]){
-
-                                //rotation is around the z-axis [0,0,1]
-                                rotate(i*360/num_sides+angle,[0,0,1])translate([0,translation])
-                                    //circle(circle_rad,center=true);
-                                    square([line_thick,line_length],center=true);
-                            }
-                            circle(outter_rad);
-                        }
-                        union(){
-                            circle(button_rad);
-                        }
-                    }
+                        //the three vertices of the triangle
+                        points =	[[0-cgal_fix*2,0-cgal_fix*2], 
+                                    [inside_rad,0-cgal_fix],
+                                    [inside_rad*cos(360/num_sides)-cgal_fix,inside_rad*sin(360/num_sides)+cgal_fix]],
+                        //the order to connect the three vertices above
+                        paths = [[0,1,2]]
+                    );
+                    
+                    // blunt edges if option specificed (default false)
+                    if (blunted)
+                        rotate(-90/num_sides,[0,0,1]) 
+                            translate([0,radius]) 
+                                square([bluntFactor*10,bluntFactor],true);
                 }
-			}
-		}
+            }
+        }
 	}
 }
+
+module partholder_maker(num_sides, radius, thick, button_rad, line_thick, rotate_supports=true){
+    angle_offset = rotate_supports ? 1: 0; 
+
+    circle_outer_rad =  button_rad+thick;
+    
+    line_length = (radius-thick)*cos(angle_offset*(180/num_sides));
+    
+//	circle_rad = ((radius-circle_outer_rad)/2)/cos(angle_offset*180/3);
+//	inner_circle_offset = circle_rad/2;
+//			// for extra led holes if inner_circle_rad > 0
+//			translate([0,0,1])linear_extrude(height=thick,center=true)
+//				for(i=[0:num_sides]){
+//					//rotation is around the z-axis [0,0,1]
+//					rotate(i*360/num_sides+angle,[0,0,1])translate([0,inner_circle_offset])
+//						circle(inner_circle_rad,center=true);
+//				}
+    echo(str("Generating flat part holder, circle of radius: ",button_rad,"mm and thickness: ",thick));
+    linear_extrude(height=thick,center=true){ 
+        //rotate the wedge n=num_sides times at angle of 360/n each time	
+        difference(){
+            union(){
+                for(i=[0:num_sides]){
+
+                    //rotation is around the z-axis [0,0,1]
+                    rotate((i+.75+angle_offset/2)*360/num_sides,[0,0,1])translate([0,line_length/2])
+                        //circle(circle_rad,center=true);
+                        square([line_thick,line_length],center=true);
+                }
+                circle(circle_outer_rad);
+            }
+            circle(button_rad);
+        }       
+    }
+}
+    
+
+
 
 //build the snaps around the tile
 //try the commands alone with i=1 and i=2 to see how this works
 //remember to read from the bottom to the top to make sense of this
-module snap_maker(num_sides,radius, radiusa,snapwidth){
+module snap_maker(num_sides, radius, thick,snapwidth){
 
 	//rotate the side of snaps n=num_sides times at angle of 360/n each time
 	for(i=[0:num_sides-1]){ 
@@ -225,15 +199,15 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 
 				//read the rest of the commands from bottom to top
 				//translate the snap to the first side
-				translate([radius,0,-thickness/2]) 
+				translate([radius,0,-thick/2]) 
 
 					//rotate the snap to correct angle for first side
 					rotate(180/num_sides,[0,0,1]) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
-					translate([-thickness/2,2*(i+.5)*snapwidth+clearance/2,0]) 
+					translate([-thick/2,2*(i+.5)*snapwidth+clearance/2,0]) 
 						union(){
-							hinge_a(thickness/2+lengthen,snapwidth-clearance,thickness/2,.01,i);
+							hinge_a(thick/2+lengthen,snapwidth-clearance,thick/2,.01,i);
 						}
 			}
  		}
@@ -241,22 +215,22 @@ module snap_maker(num_sides,radius, radiusa,snapwidth){
 }
 angleclear = 1;
 
-module fillet_maker(num_sides,radius, radiusa, snapwidth, both = true){
+module fillet_maker(num_sides,radius, thick, snapwidth, both = true){
 
 	//rotate the side of snaps n=num_sides times at angle of 360/n each time
 	for(j=[0:num_sides-1]){ 
 		rotate(j*360/num_sides,[0,0,1]) 	
 
-			translate([radius,0,-thickness/2]) 
+			translate([radius,0,-thick/2]) 
 					//rotate the snap to correct angle for first side
 			rotate(180/num_sides,[0,0,1]) 
 				translate([-angleclear,0,angleclear])
-					translate([-thickness/2,2*(snaps)*snapwidth,0]) 
+					translate([-thick/2,2*(snaps)*snapwidth,0]) 
 						union(){
 							translate([0,snapwidth-clearance/2,-angleclear])
 								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
 							if(both)
-                                translate([0,snapwidth-clearance/2,thickness-angleclear])
+                                translate([0,snapwidth-clearance/2,thick-angleclear])
                                     rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
 						}
 		//rotation is around the z-axis [0,0,1]
@@ -267,19 +241,19 @@ module fillet_maker(num_sides,radius, radiusa, snapwidth, both = true){
 
 				//read the rest of the commands from bottom to top
 				//translate the snap to the first side
-				translate([radius,0,-thickness/2]) 
+				translate([radius,0,-thick/2]) 
 
 					//rotate the snap to correct angle for first side
 					rotate(180/num_sides,[0,0,1]) 
 
 					//for i^th snap translate 2*i snapwidths over from origin
 				translate([-angleclear,0,angleclear])
-					translate([-thickness/2,2*(i+.5)*snapwidth,0]) 
+					translate([-thick/2,2*(i+.5)*snapwidth,0]) 
 						union(){
 							translate([0,snapwidth-clearance/2,-angleclear])
 								rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
 							if (both)
-                                translate([0,snapwidth-clearance/2,thickness-angleclear])
+                                translate([0,snapwidth-clearance/2,thick-angleclear])
                                     rotate([0,45,0])cube([angleclear*2,snapwidth+clearance,angleclear*2]);
 						}
 		
