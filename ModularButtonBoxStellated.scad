@@ -1,23 +1,26 @@
 
-// truncated tetra buttonbox part maker by dmt
-// based on mathgrrl polysnap tiles
+// truncated tetrahedral (and other!) buttonbox part maker by dmt
+// based on mathgrrl polysnap tiles, w/ fixed math for snap location
 
-printable = -4;
-spherefactor = 1.5; //was 1.7
-cylfactor = 1.5; //was 1.2
-x=.2    ;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
-waypoint = .2;
-
-/* [Adjust Fit] */
+/* [Adjust Fit For Snap Connections] */
 
 // Add extra space between snaps, in mm
-clearance = .17+x;
+clearance =  .37; // tested for makerbot 5 w/PLA
+                  // 0.27 good for older makerbot
+                  // and ABS parts - was x=.2 + .17
 
-// Add extra length to the snaps, in mm
-lengthen = .3;
+// Add extra length to the snaps away from body, in mm
+lengthen = .35;
 
-//percentage of sphere radius to translate
-sphere_farout=-.35+x*2/3; //was .45
+// Scale default radius for holes in snaps
+holefactor = 1.2; //was 1.2 // 1.5
+
+//scale default radius for spherical "nub" in snaps
+spherefactor = 1.3; //was 1.7  //1.5
+
+//percentage of sphere radius to translate sphere out
+sphere_farout=-.20; //was -.35+x*2/3; // x=.2 for pla //was .45
+
 
 //thick=2.5; //tri
 //thick=5.5; // hex
@@ -42,17 +45,18 @@ side_length = 40;
 // Set the border thickness, in mm
 border = 3.5;	
 
+// full-tile filet = 0, 1, or 2 sided fillet
+fillet = 2;
 
-// full-tile fillet = 0, 1, or 2 sided fillet
-fillet = 1;
+// What percentage along the length should we start transitioning to final shape in loft
+waypoint = .2;
+
+full_tile(3,3.5,2.5,6); 
 
 
-full_tile(5,3.5,12.5); 
-
-
-module test_four(thickness =  3.5, holesize = 3.5, inner, stellation = 10){
+module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
     for (j=[3:6]){
-        translate([0,0,(j-3)*20])full_tile(j,thickness,holesize,inner,stellation,waypoint);
+        translate([0,0,(j-3)*20])full_tile(j,thickness,holesize,stellation,waypoint);
     }
 }
 //test_four();
@@ -60,7 +64,8 @@ module test_four(thickness =  3.5, holesize = 3.5, inner, stellation = 10){
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, stellation_height = 10, waypoint = .4){
+module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, waypoint = .4){
+    inner_circle_rad = 0;
 	//radius of connection points -- depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
     line_thick = border/1.5/(sin(180/num_sides)); // was 6
@@ -81,7 +86,7 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, inner_circle_rad = 0, st
             poly_maker(num_sides,poly_radius,inside,thick, true); 
             
             // make the center structures
-            partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
+            *partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
 
             //TODO: center_holder(line_thick, line_length)
             *tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint);
@@ -290,7 +295,7 @@ module hinge_a(bw,hl,ro,cl,i){
 	else{
 		difference(){
 			hinge_arm(bw,hl,ro,cl);
-			translate([bw,hl+cl,ro])rotate([90,0,0])cylinder(h=hl+2*cl,r=ri*cylfactor);
+			translate([bw,hl+cl,ro])rotate([90,0,0])cylinder(h=hl+2*cl,r=ri*holefactor);
 		}
 	}
 }

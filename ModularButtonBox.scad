@@ -8,7 +8,7 @@ spherefactor = 1.7;
 cylfactor = 1.5; //was 1.2
 x=.1;  // x factor to adjust fit .1 makerbot PL .22 + remove sphere for xyz
 
-full_tile(3,3.5,2.5); 
+full_tile(5,3.5,12.5); 
 //full_tile(5,3.5,12.5); 
 
 //translate([-25+printable,0,0])rotate([0,0,60])full_tile(3,3.5,2.5);
