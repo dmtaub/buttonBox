@@ -5,7 +5,7 @@
 /* [Adjust Fit For Snap Connections] */
 
 // Add extra space between snaps, in mm
-clearance =  .37; // tested for makerbot 5 w/PLA
+clearance =  .33; // tested for makerbot 5 w/PLA
                   // 0.27 good for older makerbot
                   // and ABS parts - was x=.2 + .17
 
@@ -13,13 +13,13 @@ clearance =  .37; // tested for makerbot 5 w/PLA
 lengthen = .35;
 
 // Scale default radius for holes in snaps
-holefactor = 1.2; //was 1.2 // 1.5
+holefactor = 1.5; //was 1.2 // 1.5
 
 //scale default radius for spherical "nub" in snaps
 spherefactor = 1.3; //was 1.7  //1.5
 
 //percentage of sphere radius to translate sphere out
-sphere_farout=-.20; //was -.35+x*2/3; // x=.2 for pla //was .45
+sphere_farout= -0.25; //was -.35+x*2/3; // x=.2 for pla //was .45
 
 
 //thick=2.5; //tri
@@ -46,13 +46,14 @@ side_length = 40;
 border = 3.5;	
 
 // full-tile filet = 0, 1, or 2 sided fillet
-fillet = 2;
+fillet = 1;
 
 // What percentage along the length should we start transitioning to final shape in loft
 waypoint = .2;
 
-full_tile(3,3.5,2.5,6); 
+full_tile(6,3.5,12,15); 
 
+//full_tile(3,3.5,2.5,6); 
 
 module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
     for (j=[3:6]){
@@ -89,7 +90,7 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
             *partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
 
             //TODO: center_holder(line_thick, line_length)
-            *tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint);
+            #tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint);
 
 			//make the snaps
 			snap_maker(num_sides,radius,thick,snapwidth);
@@ -348,14 +349,14 @@ module tweener( num_sides, radius, thick, button_rad, stellation_height, waypoin
     shape2Centroid	= [0,0];			// Location of center point
     shape2ExtensionAdjustment	= 0;	// Moves top extension down by n slices.
 
-    wallThickness		= thick;				// Wall Thickness - higher values add material but will seal gaps
+    wallThickness		= thick/2;				// Wall Thickness - higher values add material but will seal gaps
                                             // Thickness is added to the exterior diameter of tu be, no effect on solids
                     
     isHollow 			= 1;				// If 1, create a tube.  If 0, create a solid.
 
     extrusionHeight	= stellation_height;				// Height of the loft
 
-    extrusionSlices = 20; //47; //max that i've seen work	
+    extrusionSlices = 40; //47; //max that i've seen work	
     sliceAdjustment	= 0;				// Ensure the slices intersect by this amount, 
                                             // needed if OpenSCAD is generating more than 2 volumes for an STL file
 
@@ -368,11 +369,11 @@ module tweener( num_sides, radius, thick, button_rad, stellation_height, waypoin
     union(){
     tweenLoft(shape1, shape1Size, shape1Rotation, shape1Centroid, shape1Extension,
                 shape1, waypointSize, waypointRotation, waypointCentroid, waypointExtension, 0,
-                firstSetCount, sliceHeight, sliceAdjustment, wallThickness/2, isHollow);
+                firstSetCount, sliceHeight, sliceAdjustment, wallThickness, isHollow);
   
     translate([0,0,stellation_height*waypointStop])
         tweenLoft(waypoint, waypointSize, waypointRotation, waypointCentroid, waypointExtension,
                 shape2, shape2Size, shape2Rotation, shape2Centroid, shape2Extension, shape2ExtensionAdjustment,
-                secondSetCount, sliceHeight, sliceAdjustment, wallThickness/2, isHollow);
+                secondSetCount, sliceHeight, sliceAdjustment, wallThickness, isHollow);
     }
 }
