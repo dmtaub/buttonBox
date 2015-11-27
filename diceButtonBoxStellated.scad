@@ -6,13 +6,13 @@
 
 // Add extra space between snaps, in mm
 default_clearance = .33;
-clear_test = [ .25, .30, .325, .35, .40];
+clear_test = [ .15, .2, .25, .30, .325];
 // 0.33 tested for makerbot 5 w/PLA
 // 0.27 good for older makerbot
 // and ABS parts - was x=.2 + .17
 
 // Add extra length to the snaps away from body, in mm
-lengthen = 11.4;
+lengthen = .5;//11.4;
 
 // Scale default radius for holes in snaps
 holefactor = 1.5; //was 1.2 // 1.5
@@ -55,6 +55,9 @@ fillet = 1;
 // What percentage along the length should we start transitioning to final shape in loft
 waypoint = .2;
 
+// whether polygon is frame or full
+poly_frame = fals;
+
 test_clear();
 //full_tile(4,3.5,12,15); 
 //full_tile(3,3.5,2.5,6); 
@@ -68,18 +71,28 @@ module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
 
 
 spacing = 25;
-module test_clear(count = 5){
-    for ( i = [0 : count]){
-        translate([0,i*spacing,0])full_tile(4,3.5,12,15,iter=i);
-    } 
+wrap = 3;
+module test_clear(sides=4, thick = 3.5, hole = 12, high= 15, count = 5){
+    for ( i = [0 : count-1]){
+        translate([(i%wrap)*spacing,-floor(i/wrap)*spacing,0])
+            difference(){
+                full_tile(sides,thick,hole,high,iter=i);
+                translate([0,0,.01])
+                    linear_extrude(thick/2)
+                        //text(str(i+1), size=8,
+                          text(str(clear_test[i]), size=5,
+                             font="Proxima Nova:style=Semibold",
+                             halign="center", valign="center");
+                }
+            } 
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 // FUNCTIONS ///////////////////////////////////////////////////////////////
 
 // pass no arguments will return default defined above, otherwise can iterate
 // through clear_test vector. reuturns undefined for out-of-index errors
+
 function clearance(i) = (i == undef) ? default_clearance : clear_test[i] ; 
 
 
@@ -87,6 +100,8 @@ function clearance(i) = (i == undef) ? default_clearance : clear_test[i] ;
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
 module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, waypoint = .4, iter){
+    echo(str(iter,") Tile:  thick=",thick,"  button_rad=",button_rad,
+                  "  stellation_height=","  waypoint=",waypoint));
     inner_circle_rad = 0;
 	//radius of connection points -- depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
@@ -130,8 +145,8 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
 module poly_maker(num_sides,radius,inside_rad,thick, blunted = false, bluntFactor=1){
     echo(str("generating ",num_sides," sided",
     (blunted ? str("(blunted by ",bluntFactor,"mm)") : ""),
-    " polygon with outer radius: ",radius,
-    " and inner radius: ",inside_rad));
+    " polygon with oRad: ",radius,
+    " and iRad: ",inside_rad));
     cgal_fix = 0;//.01; //tweaks fix CGAL errors
   	
     //extrude to thicken the polygon    
@@ -161,7 +176,7 @@ module poly_maker(num_sides,radius,inside_rad,thick, blunted = false, bluntFacto
                 rotate(i*360/num_sides,[0,0,1])	{
 
                     //make triangular wedge with angle based on number of num_sides
-                    polygon(
+                    if (poly_frame) polygon(
 
                         //the three vertices of the triangle
                         points =	[[0-cgal_fix*2,0-cgal_fix*2], 
@@ -173,7 +188,7 @@ module poly_maker(num_sides,radius,inside_rad,thick, blunted = false, bluntFacto
                     
                     // blunt edges if option specificed (default false)
                     if (blunted)
-                        rotate(-90/num_sides,[0,0,1]) 
+                        //rotate(-90/num_sides,[0,0,1]) 
                             translate([0,radius]) 
                                 square([bluntFactor*10,bluntFactor],true);
                 }
