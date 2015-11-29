@@ -5,9 +5,10 @@
 /* [Adjust Fit For Snap Connections] */
 
 // Add extra space between snaps, in mm
-default_clearance = .33;
-clear_test = [ .15, .2, .25, .30, .325];
+default_clearance = .2;//maker bot .33; // 
+clear_test = [ .15, .175, .2, .225, .25, .275];
 // 0.33 tested for makerbot 5 w/PLA
+// 0.22 
 // 0.27 good for older makerbot
 // and ABS parts - was x=.2 + .17
 
@@ -56,7 +57,7 @@ fillet = 1;
 waypoint = .2;
 
 // whether polygon is frame or full
-poly_frame = fals;
+poly_frame = false;
 
 test_clear();
 //full_tile(4,3.5,12,15); 
@@ -72,16 +73,20 @@ module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
 
 spacing = 25;
 wrap = 3;
-module test_clear(sides=4, thick = 3.5, hole = 12, high= 15, count = 5){
-    for ( i = [0 : count-1]){
+
+clear_test = [ .22, .22, .22, .22, .22, .22];
+
+
+module test_clear(sides=4, thick = 3.5, hole = 12, high= 15){
+    for ( i = [0 : len(clear_test)-1]){
         translate([(i%wrap)*spacing,-floor(i/wrap)*spacing,0])
             difference(){
                 full_tile(sides,thick,hole,high,iter=i);
                 translate([0,0,.01])
                     linear_extrude(thick/2)
-                        //text(str(i+1), size=8,
-                          text(str(clear_test[i]), size=5,
-                             font="Proxima Nova:style=Semibold",
+                        text(str(i+1), size=8,
+                        //  text(str(clear_test[i]), size=5,
+                             font="Dice:style=Medium", //"Proxima Nova:style=Semibold",
                              halign="center", valign="center");
                 }
             } 
