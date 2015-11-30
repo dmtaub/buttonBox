@@ -6,7 +6,8 @@
 
 // Add extra space between snaps, in mm
 default_clearance = .2;//maker bot .33; // 
-clear_test = [ .15, .175, .2, .225, .25, .275];
+//clear_test = [ .15, .175, .2, .225, .25, .275];
+clear_test = [ .35, .375, .4, .425, .45, .475];
 // 0.33 tested for makerbot 5 w/PLA
 // 0.22 
 // 0.27 good for older makerbot
@@ -45,7 +46,7 @@ snaps = 2; // [2,3,4,5,6,7,8]
 /* [Size] */
 
 // Set the length of each side, in mm
-side_length = snaps*10; // [10,20,40,50,60,70,80]
+side_length = snaps*6.5; // [10,20,40,50,60,70,80]
 
 // Set the border thickness, in mm
 border = 3.5;	
@@ -59,7 +60,23 @@ waypoint = .2;
 // whether polygon is frame or full
 poly_frame = false;
 
-test_clear();
+
+//clear_test = [ .22, .22, .22, .22, .22, .22];
+indices = ["1", "2","3","4","5","6"];
+
+// print clearances on dice:
+test_clearances(4, 2);
+
+// print numerals on dice:
+//test_clearances(4, 2, indices, size=7 );
+
+// print dice with dots as material
+//test_clearances(4, 2, ["!", "@","#","$","%","^"], "dPoly Gamedings:style=Medium", 8, true, [0.3,-0.2,.01]);
+
+// print dice with dots as holes
+//test_clearances(4, 2, indices, "Dice:style=Medium", 6, true);
+
+
 //full_tile(4,3.5,12,15); 
 //full_tile(3,3.5,2.5,6); 
 
@@ -71,26 +88,23 @@ module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
 //test_four();
 
 
-spacing = 25;
+spacing = 20;
 wrap = 3;
 
-clear_test = [ .22, .22, .22, .22, .22, .22];
-
-darkdice = ["!", "@","#","$","%","^"];
-module test_clear(sides=4, thick = 3.5, hole = 12, high= 15){
+module test_clearances(sides=4, thick = 2, faces = clear_test, font = "Proxima Nova:style=Semibold", size = 3, rotate45 = false, font_trans = [0,0,0.01]){
+    hole = 12;
+    high= 15;
     for ( i = [0 : len(clear_test)-1]){
         translate([(i%wrap)*spacing,-floor(i/wrap)*spacing,0])
             difference(){
                 full_tile(sides,thick,hole,high,iter=i);
-                rotate(45)translate([0.3,-0.2,.01])
+                rotate(rotate45 ? 45 : 0)
+                 translate(font_trans)
                     linear_extrude(thick/2)
-                        text(darkdice[i], size=12,
-                        //  text(str(clear_test[i]), size=5,
-                             font="dPoly Gamedings:style=Medium",
-     // "Dice:style=Medium", //"Proxima Nova:style=Semibold",
-                             halign="center", valign="center");
-                }
-            } 
+                      text(str(faces[i]), size=size, font=font,
+                           halign="center", valign="center");
+            }
+    } 
 }
 
 //////////////////////////////////////////////////////////////////////////
