@@ -1,6 +1,8 @@
 
 // truncated tetrahedral (and other!) buttonbox part maker by dmt
 // based on mathgrrl polysnap tiles, w/ fixed math for snap location
+DEBUG = false;
+
 
 /* [Adjust Fit For Snap Connections] */
 
@@ -133,7 +135,8 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
 	inside = poly_radius-border/(cos(180/num_sides))-lengthen;
     
     // draw a line thru the connection point
-    %translate([radius,0,0])rotate([0,0,180/num_sides])cube([1,100,1],true);
+    if (DEBUG)
+        %translate([radius,0,0])rotate([0,0,180/num_sides])cube([1,100,1],true);
 
 	snapwidth = side_length/2/(snaps+1);
 
