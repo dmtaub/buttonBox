@@ -76,17 +76,18 @@ wrap = 3;
 
 clear_test = [ .22, .22, .22, .22, .22, .22];
 
-
+darkdice = ["!", "@","#","$","%","^"];
 module test_clear(sides=4, thick = 3.5, hole = 12, high= 15){
     for ( i = [0 : len(clear_test)-1]){
         translate([(i%wrap)*spacing,-floor(i/wrap)*spacing,0])
             difference(){
                 full_tile(sides,thick,hole,high,iter=i);
-                translate([0,0,.01])
+                rotate(45)translate([0.3,-0.2,.01])
                     linear_extrude(thick/2)
-                        text(str(i+1), size=8,
+                        text(darkdice[i], size=12,
                         //  text(str(clear_test[i]), size=5,
-                             font="Dice:style=Medium", //"Proxima Nova:style=Semibold",
+                             font="dPoly Gamedings:style=Medium",
+     // "Dice:style=Medium", //"Proxima Nova:style=Semibold",
                              halign="center", valign="center");
                 }
             } 
