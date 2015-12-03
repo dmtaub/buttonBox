@@ -48,7 +48,7 @@ snaps = 2; // [2,3,4,5,6,7,8]
 /* [Size] */
 
 // Set the length of each side, in mm
-side_length = snaps*11; // [10,20,40,50,60,70,80]
+side_length = snaps*6.5; // [10,20,40,50,60,70,80]
 
 // Set the border thickness, in mm
 border = 3.5;	
@@ -63,17 +63,17 @@ waypoint = .2;
 poly_frame = false;
 
 
-//clear_test = [ .22, .22, .22, .22, .22, .22];
+clear_test = [ .22, .22, .22, .22, .22, .22];
 indices = ["1", "2","3","4","5","6"];
-clear_test=[.22];
+
 // print clearances on dice:
-test_clearances(faces=["","","","","",""]);
+//test_clearances(4, 2);
 
 // print numerals on dice:
 //test_clearances(4, 2, indices, size=7 );
 
 // print dice with dots as material
-//test_clearances(4, 2, ["!", "@","#","$","%","^"], "dPoly Gamedings:style=Medium", 8, true, [0.3,-0.2,.01]);
+test_clearances(4, 2, ["!", "@","#","$","%","^"], "dPoly Gamedings:style=Medium", 8, true, [0.3,-0.2,.01]);
 
 // print dice with dots as holes
 //test_clearances(4, 2, indices, "Dice:style=Medium", 6, true);
@@ -90,10 +90,10 @@ module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
 //test_four();
 
 
-spacing = 28;
+spacing = 20;
 wrap = 3;
 
-module test_clearances(sides=4, thick = 3.5, faces = clear_test, font = "Proxima Nova:style=Semibold", size = 3, rotate45 = false, font_trans = [0,0,0.01]){
+module test_clearances(sides=4, thick = 2, faces = clear_test, font = "Proxima Nova:style=Semibold", size = 3, rotate45 = false, font_trans = [0,0,0.01]){
     hole = 12;
     high= 15;
     for ( i = [0 : len(clear_test)-1]){
@@ -105,6 +105,7 @@ module test_clearances(sides=4, thick = 3.5, faces = clear_test, font = "Proxima
                     linear_extrude(thick/2)
                       text(str(faces[i]), size=size, font=font,
                            halign="center", valign="center");
+                *translate([0,0,-.5])cube([100,100,2],true);
             }
     } 
 }
@@ -144,7 +145,7 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
 		union(){
 			//make the polygon base
             poly_maker(num_sides,poly_radius,inside,thick, true); 
-            
+           //poly_maker(num_sides,poly_radius-1.7,inside,thick, true);  
             // make the center structures
             *partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
 
