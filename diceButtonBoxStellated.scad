@@ -9,10 +9,10 @@ DEBUG = false;
 // Add extra space between snaps, in mm
 default_clearance = .2;//maker bot .33; // 
 //clear_test = [ .15, .175, .2, .225, .25, .275];
-clear_test = [ .35, .375, .4, .425, .45, .475];
+clear_test = [ .35, .325, .3, .275, .25, .225];
 // 0.33 tested for makerbot 5 w/PLA
 // 0.22 
-// 0.27 good for older makerbot
+// 0.27 good for older makerbotgit 
 // and ABS parts - was x=.2 + .17
 
 // Add extra length to the snaps away from body, in mm
@@ -48,7 +48,7 @@ snaps = 2; // [2,3,4,5,6,7,8]
 /* [Size] */
 
 // Set the length of each side, in mm
-side_length = snaps*6.5; // [10,20,40,50,60,70,80]
+side_length = snaps*11; // [10,20,40,50,60,70,80]
 
 // Set the border thickness, in mm
 border = 3.5;	
@@ -65,9 +65,9 @@ poly_frame = false;
 
 //clear_test = [ .22, .22, .22, .22, .22, .22];
 indices = ["1", "2","3","4","5","6"];
-
+clear_test=[.22];
 // print clearances on dice:
-test_clearances(4, 2);
+test_clearances(faces=["","","","","",""]);
 
 // print numerals on dice:
 //test_clearances(4, 2, indices, size=7 );
@@ -90,10 +90,10 @@ module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
 //test_four();
 
 
-spacing = 20;
+spacing = 28;
 wrap = 3;
 
-module test_clearances(sides=4, thick = 2, faces = clear_test, font = "Proxima Nova:style=Semibold", size = 3, rotate45 = false, font_trans = [0,0,0.01]){
+module test_clearances(sides=4, thick = 3.5, faces = clear_test, font = "Proxima Nova:style=Semibold", size = 3, rotate45 = false, font_trans = [0,0,0.01]){
     hole = 12;
     high= 15;
     for ( i = [0 : len(clear_test)-1]){
