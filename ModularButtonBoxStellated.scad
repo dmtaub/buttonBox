@@ -51,7 +51,8 @@ fillet = 1;
 // What percentage along the length should we start transitioning to final shape in loft
 waypoint = .2;
 
-full_tile(6,3.5,12,15); 
+full_tile(6,3.5,12,15)
+//full_tile(5,3.5,12,15, .4, tween_circle, 1.5, tween_triangle); 
 
 //full_tile(3,3.5,2.5,6); 
 
@@ -65,7 +66,7 @@ module test_four(thickness =  3.5, holesize = 3.5, stellation = 10){
 
 //////////////////////////////////////////////////////////////////////////
 // RENDERS ///////////////////////////////////////////////////////////////
-module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, waypoint = .4){
+module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, waypoint = .4, mid_shape = undef, mid_adjust = 0, end_shape = undef){
     inner_circle_rad = 0;
 	//radius of connection points -- depends on side length
 	radius = side_length/(2*sin(180/num_sides)); 
@@ -90,7 +91,7 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
             *partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
 
             //TODO: center_holder(line_thick, line_length)
-            #tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint);
+            tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint, mid_shape, mid_adjust, end_shape );
 
 			//make the snaps
 			snap_maker(num_sides,radius,thick,snapwidth);
@@ -319,7 +320,7 @@ use <tween_loft.scad>			// Define all functions (this is the main file with full
 include <tween_shapes.scad>	// Define all tween shape geometries
 
 // ------------------------Parameters -----------------------------------------------
-module tweener( num_sides, radius, thick, button_rad, stellation_height, waypointStop = .5 ) {
+module tweener( num_sides, radius, thick, button_rad, stellation_height, waypointStop = .5, waypointShape = undef, waypointSizeAdjust = 0, finalShape = undef) {
     shapes = [0,0,0, tween_triangle, tween_square, tween_pentagon, tween_hexagon];
     shapes2 = [0,0,0, tween_triangle, tween_square, tween_circle, tween_circle];
     shape1 = shapes[num_sides];
@@ -333,8 +334,8 @@ module tweener( num_sides, radius, thick, button_rad, stellation_height, waypoin
 
 
     // The middle shape
-    waypoint = shape1;
-    waypointSize 		= waypointStop*(button_rad-shape1Size)+shape1Size; //waypointStop*radius+(1-waypointStop)*button_rad;				
+    waypoint = waypointShape ? waypointShape : shape1;
+    waypointSize 		= waypointStop*(button_rad-shape1Size)+shape1Size - waypointSizeAdjust; //waypointStop*radius+(1-waypointStop)*button_rad;				
     // Size of the lower shape
     waypointRotation 	= 0;				// Rotation of the lower shape
     waypointExtension 	= 0;				// Extend the profile (space for tube clamp, etc.)
@@ -342,7 +343,7 @@ module tweener( num_sides, radius, thick, button_rad, stellation_height, waypoin
 
 
     // The upper shape
-    shape2			= shapes2[num_sides];		
+    shape2			= finalShape ? finalShape : shapes2[num_sides];		
     shape2Size 		= button_rad;				// Size of the upper shape
     shape2Rotation 	= 0;				// RotationSize of the upper shape
     shape2Extension 	= 0;				// Extend the profile (space for tube clamp, etc.)
@@ -368,7 +369,7 @@ module tweener( num_sides, radius, thick, button_rad, stellation_height, waypoin
     translate([0,0,shape1Extension/2])
     union(){
     tweenLoft(shape1, shape1Size, shape1Rotation, shape1Centroid, shape1Extension,
-                shape1, waypointSize, waypointRotation, waypointCentroid, waypointExtension, 0,
+                waypoint, waypointSize, waypointRotation, waypointCentroid, waypointExtension, 0,
                 firstSetCount, sliceHeight, sliceAdjustment, wallThickness, isHollow);
   
     translate([0,0,stellation_height*waypointStop])
