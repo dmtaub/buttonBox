@@ -51,7 +51,7 @@ fillet = 1;
 // What percentage along the length should we start transitioning to final shape in loft
 waypoint = .2;
 
-full_tile(6,3.5,12,15)
+full_tile(6,3.5,12,15);
 //full_tile(5,3.5,12,15, .4, tween_circle, 1.5, tween_triangle); 
 
 //full_tile(3,3.5,2.5,6); 
