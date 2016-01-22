@@ -10,7 +10,7 @@ clearance =  .33; // tested for makerbot 5 w/PLA
                   // and ABS parts - was x=.2 + .17
 
 // Add extra length to the snaps away from body, in mm
-lengthen = .35;
+lengthen = .35; //7.4; //was .35
 
 // Scale default radius for holes in snaps
 holefactor = 1.5; //was 1.2 // 1.5
@@ -29,6 +29,7 @@ sphere_farout= -0.25; //was -.35+x*2/3; // x=.2 for pla //was .45
 //line_thick = 4; //tri
 //line_thick = 6; //hex
 
+FILL_TO_USE = 0;  //1 for flat 2 for stellated
 //////////////////////////////////////////////////////////////////////////
 // PARAMETERS ////////////////////////////////////////////////////////////
 $fn=50;
@@ -51,7 +52,7 @@ fillet = 1;
 // What percentage along the length should we start transitioning to final shape in loft
 waypoint = .2;
 
-full_tile(6,3.5,12,15);
+full_tile(3,3.5,12,15);
 //full_tile(5,3.5,12,15, .4, tween_circle, 1.5, tween_triangle); 
 
 //full_tile(3,3.5,2.5,6); 
@@ -87,11 +88,12 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
 			//make the polygon base
             poly_maker(num_sides,poly_radius,inside,thick, true); 
             
+            if (FILL_TO_USE == 1)
             // make the center structures
-            *partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
-
-            //TODO: center_holder(line_thick, line_length)
-            tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint, mid_shape, mid_adjust, end_shape );
+                partholder_maker(num_sides, poly_radius, thick, button_rad, line_thick, true);
+            if (FILL_TO_USE == 2)
+                //TODO: center_holder(line_thick, line_length)
+                tweener( num_sides, poly_radius-.3, thick, button_rad, stellation_height, waypoint, mid_shape, mid_adjust, end_shape );
 
 			//make the snaps
 			snap_maker(num_sides,radius,thick,snapwidth);

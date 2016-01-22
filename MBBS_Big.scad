@@ -51,7 +51,8 @@ fillet = 0;
 // What percentage along the length should we start transitioning to final shape in loft
 waypoint = .2;
 
-//full_tile(3,3.5,12,15); 
+translate([-8,53,0])rotate(14)full_tile(3,3.5,12,15); 
+translate([8,-57,0])rotate(-44)full_tile(3,3.5,12,15); 
 full_tile(6,3.5,12,15); 
 //translate([6,0,0])full_tile(5,3.5,12,15);  
 //translate([15,0,0])full_tile(4,3.5,12,15); 
