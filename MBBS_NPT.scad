@@ -60,7 +60,9 @@ include <threads.scad>
 //for( i = [1:]){
 difference(){
 full_tile(3,3.5,6,15, .4, tween_triangle, 1.5, tween_triangle); 
-    translate([0,0,-10])english_thread (diameter=1/2, threads_per_inch=20, length=.5);
+union(){    translate([0,0,-10])english_thread (diameter=.55, threads_per_inch=14, length=.5);
+    //translate([0,0,1.5])cylinder(h=.5,r=.25*25.4);
+}
 }
 //translate([0,50*i,0])full_tile(3,3.5,6,15, .4, tween_triangle, 1.5, tween_triangle); 
 //}
@@ -88,7 +90,7 @@ module full_tile(num_sides, thick=3.5, button_rad=16.5, stellation_height = 10, 
 	inside = poly_radius-border/(cos(180/num_sides))-lengthen;
     
     // draw a line thru the connection point
-    %translate([radius,0,0])rotate([0,0,180/num_sides])cube([1,100,1],true);
+    //translate([radius,0,0])rotate([0,0,180/num_sides])cube([1,100,1],true);
 
 	snapwidth = side_length/2/(snaps+1);
 
